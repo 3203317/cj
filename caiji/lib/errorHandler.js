@@ -28,7 +28,7 @@ exports.appErrorProcess = function(app){
 			console.error(err);
 			// send mail
 			mailService.sendMail({
-				subject: 'rvt.dolalive.com [Api Error]',
+				subject: 'www.foreworld.net [Web Error]',
 				template: [
 					path.join(cwd, 'lib', 'ErrorMail.vm.html'), {
 						data: {
@@ -51,7 +51,7 @@ exports.appErrorProcess = function(app){
 			console.error(err);
 			// send mail
 			mailService.sendMail({
-				subject: 'rvt.dolalive.com [Api Uncaught Error]',
+				subject: 'www.foreworld.net [Web Uncaught Error]',
 				template: [
 					path.join(cwd, 'lib', 'ErrorMail.vm.html'), {
 						data: {
