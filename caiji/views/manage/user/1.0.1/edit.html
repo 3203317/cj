@@ -1,0 +1,69 @@
+#parse('_pagelet/constant.html')
+<!DOCTYPE html>
+<html>
+<head>
+#parse('_pagelet/header.html')
+<title>用户管理 | 修改</title>
+<link rel='stylesheet' type='text/css' media='screen'
+	href='${conf.html.virtualPath}public/assets/css/iframe.css' />
+</head>
+<body>
+	<div class='container'>
+		<div class='row'>
+			<div class='col-sm-12 col-md-12'>
+				<ol class='breadcrumb'>
+					<li class='active'><i class='fa fa-home fa-fw'></i> 后台管理</li>
+					<li class='active'><a href='javascript:;'
+						onclick='parent.location.href="$!{conf.html.virtualPath}manage/#page/user/"'>用户管理</a>
+					</li>
+					<li class='active'><a href='javascript:location.reload();'>编辑</a></li>
+				</ol>
+			</div>
+		</div>
+		<div class='row'>
+			<div class='col-sm-12 col-md-12'>
+				<div class='panel panel-default'>
+					<div class='panel-body'>#parse('manage/user/1.0.1/_pagelet/form.html')</div>
+				</div>
+			</div>
+		</div>
+		<div class='row'>
+			<div class='col-sm-12 col-md-12'>
+				<div id='info_alert' class='alert alert-info'>
+					<button type='button' class='close' data-dismiss='alert'>&times;</button>
+					<strong>提示：</strong>邀请人信息
+				</div>
+			</div>
+		</div>
+		<div class='row'>
+			<div class='col-sm-12 col-md-12'>
+				<div class='panel panel-default table-responsive'>#parse('manage/user/1.0.1/_pagelet/list.html')</div>
+			</div>
+		</div>
+	</div>
+	#parse('_pagelet/js.html')
+	<script type='text/javascript'
+		src='${conf.html.virtualPath}public/assets/js/iframe.js'></script>
+	<script>
+		$(function() {
+			$('#addFrm_btn_submit').click(function() {
+				$.ajax({
+					url : '$!{conf.html.virtualPath}manage/user/edit',
+					type : 'POST',
+					dataType : 'JSON',
+					data : { data: JSON.stringify($('#addFrm').serializeObjectForm()) },
+					success : function(data) {
+						if (!data.success)
+							return alert(data.msg[0]);
+						var url = '$!{conf.html.virtualPath}manage/#page/user/';
+						parent.location.href = url;
+					},
+					error : function() {
+						alert(arguments[2]);
+					}
+				});
+			});
+		});
+	</script>
+</body>
+</html>
