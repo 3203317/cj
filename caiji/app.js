@@ -74,4 +74,10 @@ var server = http.createServer(app);
 server.listen(app.get('port'), function(){
 	console.log('Express server listening on port %s.', app.get('port'));
 	require('./routes')(app);
+
+	// TODO
+	var robot = require('./lib/robot');
+	robot.start(function(){
+		console.log('robot start');
+	});
 });

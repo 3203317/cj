@@ -24,6 +24,6 @@ module.exports = {
 	}, formatDate: function(time){
 		return !time ? '' : util.format(time, 'YY-MM-dd hh:mm:ss');
 	}, isNull: function(val){
-		return val ? val : '';
+		return val || '';
 	}
 };
