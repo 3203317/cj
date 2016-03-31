@@ -29,15 +29,20 @@ var biz = {
  * @return
  */
 exports.start = function(cb){
+	start.call(this);
+	cb();
+};
+
+function start(){
 	var self = this;
-
+	// TODO
 	biz.uri.getByStatus(0, function (err, doc){
-		if(err) return;
-		if(!doc) return;
-		// TODO
+		if(err) return start.call(self);
+		if(!doc) return start.call(self);
 
+		// TODO
 		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
-			if(err) return;
+			if(err) return start.call(self);
 			// TODO
 			doc.HTML = html;
 			doc.STATUS = 1;
@@ -45,13 +50,10 @@ exports.start = function(cb){
 			biz.uri.editInfo(doc, function (err, msg, status){
 				if(err) return;
 				// TODO
-
 			});
 		});
 	});
-
-	cb();
-};
+}
 
 /**
  * 返回HTML字符串
@@ -77,7 +79,6 @@ function sendReq(uri, charset, cb){
 		res.on('end', function(){
 			cb(null, iconv.decode(bh.toBuffer(), charset));
 		});
-
 	}).on('error', function (err){
 		cb(err);
 	}).on('finish', function(){

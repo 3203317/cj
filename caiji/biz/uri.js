@@ -16,7 +16,7 @@ var EventProxy = require('eventproxy');
 var exports = module.exports;
 
 (function (exports){
-	var sql = 'SELECT * FROM c_uri WHERE STATUS=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	var sql = 'SELECT * FROM c_uri WHERE STATUS=? ORDER BY CREATE_TIME ASC, RETRY_COUNT ASC LIMIT 1';
 	/**
 	 *
 	 * @params
