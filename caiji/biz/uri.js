@@ -62,7 +62,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_uri (id, PID, PATH, URI, CHARSET, HTML, CREATE_TIME, STATUS) values (?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_uri (id, PID, PATH, URI, CHARSET, HTML, TITLE, TASK_ID, CREATE_TIME, STATUS) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -75,12 +75,14 @@ exports.getById = function(id, cb){
 					newInfo.URI,
 					newInfo.CHARSET,
 					newInfo.HTML,
+					newInfo.TITLE,
+					newInfo.TASK_ID,
 					new Date(),
 					0
 				];
 				mysql.query(sql, postData, function (err, status){
 					if(err) return cb(err);
-					cb(null, null, status);
+					cb(null, status);
 				});
 			});
 		};
@@ -92,7 +94,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_uri set PID=?, PATH=?, URI=?, CHARSET=?, HTML=?, STATUS=? WHERE id=?';
+		var sql = 'UPDATE c_uri set PID=?, PATH=?, URI=?, CHARSET=?, HTML=?, TITLE=?, TASK_ID=?, STATUS=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -104,12 +106,14 @@ exports.getById = function(id, cb){
 					newInfo.URI,
 					newInfo.CHARSET,
 					newInfo.HTML,
+					newInfo.TITLE,
+					newInfo.TASK_ID,
 					newInfo.STATUS,
 					newInfo.id
 				];
 				mysql.query(sql, postData, function (err, status){
 					if(err) return cb(err);
-					cb(null, null, status);
+					cb(null, status);
 				});
 			});
 		};

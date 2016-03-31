@@ -48,8 +48,9 @@ function start(){
 			doc.STATUS = 1;
 
 			biz.uri.editInfo(doc, function (err, msg, status){
-				if(err) return;
+				if(err) return start.call(self);
 				// TODO
+				start.call(self);
 			});
 		});
 	});
