@@ -19,16 +19,37 @@ var iconv = require('iconv-lite');
 
 var conf = require('../settings');
 
+var biz = {
+	uri: require('../biz/uri')
+};
+
 /**
  *
  * @params
  * @return
  */
 exports.start = function(cb){
-	var url = 'https://www.taobao.com';
-	sendReq.call(this, url, 'utf-8', function (err, html){
-		console.log(arguments);
+	var self = this;
+
+	biz.uri.getByStatus(0, function (err, doc){
+		if(err) return;
+		if(!doc) return;
+		// TODO
+
+		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
+			if(err) return;
+			// TODO
+			doc.HTML = html;
+			doc.STATUS = 1;
+
+			biz.uri.editInfo(doc, function (err, msg, status){
+				if(err) return;
+				// TODO
+
+			});
+		});
 	});
+
 	cb();
 };
 
@@ -38,10 +59,12 @@ exports.start = function(cb){
  * @params
  * @return
  */
-function sendReq(url, charset, cb){
+function sendReq(uri, charset, cb){
 	var self = this;
 
-	var req = getReq(url);
+	charset = charset || 'utf-8';
+
+	var req = getReq(uri);
 
 	req.on('response', function (res){
 		var bh = new BufferHelper();
@@ -58,7 +81,7 @@ function sendReq(url, charset, cb){
 	}).on('error', function (err){
 		cb(err);
 	}).on('finish', function(){
-		console.log('catch url:', url);
+		// TODO
 	});
 
 	req.end();
@@ -70,6 +93,6 @@ function sendReq(url, charset, cb){
  * @params
  * @return
  */
-function getReq(url){
-	return (0 === url.indexOf('https:')) ? https.request(url) : http.request(url);
+function getReq(uri){
+	return (0 === uri.indexOf('https:')) ? https.request(uri) : http.request(uri);
 }

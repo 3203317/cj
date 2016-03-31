@@ -12,7 +12,7 @@ module.exports = {
 		name: '打电话',
 		website: 'http://www.dolalive.com/'
 	}, mysql: {
-		database: 'rvt-manage',
+		database: 'caiji',
 		host: '192.168.56.1',
 		port: 22306,
 		user: 'root',
