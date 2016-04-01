@@ -30,8 +30,6 @@ var Component = function(opts){
 	var self = this;
 	opts = opts || {};
 	self.opts = opts;
-	// TODO
-	self.state = STATE_START;
 };
 
 module.exports = Component;
@@ -39,6 +37,7 @@ var pro = Component.prototype;
 pro.name = '__catcher__';
 
 pro.start = function(){
+	this.state = STATE_START;
 	start.call(this);
 };
 
@@ -77,8 +76,6 @@ function start(){
  * @return
  */
 function sendReq(uri, charset, cb){
-	var self = this;
-
 	charset = charset || 'utf-8';
 
 	var req = getReq(uri);

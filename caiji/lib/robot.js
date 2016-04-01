@@ -24,7 +24,7 @@ var Component = function(opts){
 	opts = opts || {};
 	self.opts = opts;
 	// TODO
-	self.state = STATE_START;
+	self.state = STATE_STOPED;
 };
 
 module.exports = Component;
@@ -34,7 +34,8 @@ pro.name = '__robot__';
 pro.start = function(cb){
 	var self = this;
 	// TODO
-	if(STATE_STOPED === self.state) return;
+	if(STATE_START === self.state) return;
+	self.state = STATE_START;
 
 	self.catcher = new Catcher(self.opts);
 	self.catcher.start();
@@ -47,6 +48,6 @@ pro.stop = function(force){
 	var self = this;
 	// TODO
 	if(STATE_STOPED === self.state) return;
-	if(self.catcher) self.catcher.stop();
 	self.state = STATE_STOPED;
+	if(self.catcher) self.catcher.stop();
 };
