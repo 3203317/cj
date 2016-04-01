@@ -71,6 +71,8 @@ app.use(app.router)
 
 errorHandler.appErrorProcess(app);
 
+var Robot = require('./lib/robot');
+
 var server = http.createServer(app);
 // server.setTimeout(5000);
 server.listen(app.get('port'), function(){
@@ -78,6 +80,6 @@ server.listen(app.get('port'), function(){
 	require('./routes')(app);
 
 	// TODO
-	var robot = require('./lib/robot');
-	robot.start(function(){ console.log('[%s] Robot start.', util.format()); });
+	var robot = new Robot();
+	robot.start(function(){ console.log('[%s] Robot was started.', util.format()); });
 });

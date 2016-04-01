@@ -5,96 +5,48 @@
  */
 'use strict';
 
-var fs = require('fs');
-var velocity = require('velocityjs');
-var util = require('speedt-utils')
-var cwd = process.cwd();
-
-var http = require('http');
-var https = require('https');
-var url = require('url');
-
-var BufferHelper = require('bufferhelper');
-var iconv = require('iconv-lite');
+var util = require('util');
+var utils = require('speedt-utils');
 
 var conf = require('../settings');
 
-var biz = {
-	uri: require('../biz/uri')
+var Catcher = require('./catcher');
+
+var STATE_START   = 1;
+var STATE_STOPED  = 2;
+
+module.exports = function(opts){
+	return new Component(opts);
 };
 
-/**
- *
- * @params
- * @return
- */
-exports.start = function(cb){
-	start.call(this);
-	cb();
+var Component = function(opts){
+	var self = this;
+	opts = opts || {};
+	self.opts = opts;
+	// TODO
+	self.state = STATE_START;
 };
 
-function start(){
+module.exports = Component;
+var pro = Component.prototype;
+pro.name = '__robot__';
+
+pro.start = function(cb){
 	var self = this;
 	// TODO
-	biz.uri.getByStatus(0, function (err, doc){
-		if(err) return start.call(self);
-		if(!doc) return start.call(self);
+	if(STATE_STOPED === self.state) return;
 
-		// TODO
-		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
-			if(err) return start.call(self);
-			// TODO
-			doc.HTML = html;
-			doc.STATUS = 1;
+	self.catcher = new Catcher(self.opts);
+	self.catcher.start();
 
-			biz.uri.editInfo(doc, function (err, msg, status){
-				if(err) return start.call(self);
-				// TODO
-				start.call(self);
-			});
-		});
-	});
-}
+	// TODO
+	process.nextTick(cb);
+};
 
-/**
- * 返回HTML字符串
- *
- * @params
- * @return
- */
-function sendReq(uri, charset, cb){
+pro.stop = function(force){
 	var self = this;
-
-	charset = charset || 'utf-8';
-
-	var req = getReq(uri);
-
-	req.on('response', function (res){
-		var bh = new BufferHelper();
-		// var ct = res.headers['content-type'];
-
-		res.on('data', function (chunk){
-			bh.concat(chunk);
-		});
-
-		res.on('end', function(){
-			cb(null, iconv.decode(bh.toBuffer(), charset));
-		});
-	}).on('error', function (err){
-		cb(err);
-	}).on('finish', function(){
-		// TODO
-	});
-
-	req.end();
-}
-
-/**
- * 获取http或https
- *
- * @params
- * @return
- */
-function getReq(uri){
-	return (0 === uri.indexOf('https:')) ? https.request(uri) : http.request(uri);
-}
+	// TODO
+	if(STATE_STOPED === self.state) return;
+	if(self.catcher) self.catcher.stop();
+	self.state = STATE_STOPED;
+};
