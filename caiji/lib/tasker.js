@@ -78,7 +78,6 @@ function updateTaskInfo(doc){
 
 function single(doc){
 	var self = this;
-
 	// TODO
 	biz.uri.findByTaskId(doc.id, function (err, docs){
 		if(err) return start.call(self);
