@@ -66,12 +66,40 @@ function start(){
 	});
 }
 
-function single(){
+function updateTaskInfo(doc){
 	var self = this;
-	start.call(self);
+	doc.STARTUP = 0;
+	biz.task.editInfo(doc, function (err, status){
+		if(err) return start.call(self);
+		// TODO
+		start.call(self);
+	});
 }
 
-function batch(){
+function single(doc){
+	var self = this;
+
+	// TODO
+	biz.uri.findByTaskId(doc.id, function (err, docs){
+		if(err) return start.call(self);
+		// TODO
+		if(docs && 1 === docs.length) return updateTaskInfo.call(self, doc);
+
+		// TODO
+		var newInfo = {
+			URI: doc.PORTAL_URI,
+			TASK_ID: doc.id
+		};
+
+		biz.uri.saveNew(newInfo, function (err, status){
+			if(err) return start.call(self);
+			// TODO
+			updateTaskInfo.call(self, doc);
+		});
+	});
+}
+
+function batch(doc){
 	var self = this;
 	start.call(self);
 }
