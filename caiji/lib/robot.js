@@ -11,6 +11,7 @@ var utils = require('speedt-utils');
 var conf = require('../settings');
 
 var Catcher = require('./catcher');
+var Tasker = require('./tasker');
 
 var STATE_START   = 1;
 var STATE_STOPED  = 2;
@@ -40,6 +41,9 @@ pro.start = function(cb){
 	self.catcher = new Catcher(self.opts);
 	self.catcher.start();
 
+	self.tasker = new Tasker(self.opts);
+	self.tasker.start();
+
 	// TODO
 	process.nextTick(cb);
 };
@@ -50,4 +54,6 @@ pro.stop = function(force){
 	if(STATE_STOPED === self.state) return;
 	self.state = STATE_STOPED;
 	if(self.catcher) self.catcher.stop();
+	// TODO
+	if(self.tasker) self.tasker.stop();
 };

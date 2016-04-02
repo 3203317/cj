@@ -49,7 +49,7 @@ function start(){
 	var self = this;
 	if(STATE_STOPED === self.state) return;
 	// TODO
-	biz.uri.getByStatus(0, function (err, doc){
+	biz.uri.getByFinished(0, function (err, doc){
 		if(err) return start.call(self);
 		if(!doc) return start.call(self);
 
@@ -58,7 +58,7 @@ function start(){
 			if(err) return start.call(self);
 			// TODO
 			doc.HTML = html;
-			doc.STATUS = 1;
+			doc.FINISHED = 1;
 
 			biz.uri.editInfo(doc, function (err, status){
 				if(err) return start.call(self);

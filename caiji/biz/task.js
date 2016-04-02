@@ -16,16 +16,16 @@ var EventProxy = require('eventproxy');
 var exports = module.exports;
 
 (function (exports){
-	var sql = 'SELECT * FROM c_uri WHERE FINISHED=? ORDER BY CREATE_TIME ASC, RETRY_COUNT ASC LIMIT 1';
+	var sql = 'SELECT * FROM c_task WHERE STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
 	 * @params
 	 * @return
 	 */
-	exports.getByFinished = function(finished, cb){
-		finished = finished || 0;
+	exports.getByStartup = function(startup, cb){
+		startup = startup || 0;
 		// TODO
-		mysql.query(sql, [finished], function (err, docs){
+		mysql.query(sql, [startup], function (err, docs){
 			if(err) return cb(err);
 			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
@@ -39,7 +39,7 @@ var exports = module.exports;
  */
 exports.getById = function(id, cb){
 	// TODO
-	mysql_util.find(null, 'c_uri', [['id', '=', id]], null, null, function (err, docs){
+	mysql_util.find(null, 'c_task', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 	});
@@ -62,7 +62,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_uri (id, URI, CHARSET, HTML, TITLE, TASK_ID, CREATE_TIME, FINISHED) values (?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_task (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -70,11 +70,7 @@ exports.getById = function(id, cb){
 				// CREATE
 				var postData = [
 					util.replaceAll(uuid.v1(), '-', ''),
-					newInfo.URI,
-					newInfo.CHARSET,
-					newInfo.HTML,
-					newInfo.TITLE,
-					newInfo.TASK_ID,
+					newInfo.TASK_NAME,
 					new Date(),
 					0
 				];
@@ -92,19 +88,15 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_uri set URI=?, CHARSET=?, HTML=?, TITLE=?, TASK_ID=?, FINISHED=? WHERE id=?';
+		var sql = 'UPDATE c_task set TASK_NAME=?, STARTUP=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
 				if(err) return cb(err);
 				// EDIT
 				var postData = [
-					newInfo.URI,
-					newInfo.CHARSET,
-					newInfo.HTML,
-					newInfo.TITLE,
-					newInfo.TASK_ID,
-					newInfo.FINISHED,
+					newInfo.TASK_NAME,
+					newInfo.STARTUP,
 					newInfo.id
 				];
 				mysql.query(sql, postData, function (err, status){
