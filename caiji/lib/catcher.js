@@ -5,8 +5,11 @@
  */
 'use strict';
 
+var fs = require('fs');
+
 var util = require('util');
 var utils = require('speedt-utils');
+var EventProxy = require('eventproxy');
 
 var http = require('http');
 var https = require('https');
@@ -14,6 +17,8 @@ var url = require('url');
 
 var BufferHelper = require('bufferhelper');
 var iconv = require('iconv-lite');
+
+var conf = require('../settings');
 
 var biz = {
 	uri: require('../biz/uri')
@@ -56,14 +61,26 @@ function start(){
 		// TODO
 		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
 			if(err) return start.call(self);
-			// TODO
-			doc.HTML = html;
-			doc.FINISHED = 1;
 
-			biz.uri.editInfo(doc, function (err, status){
-				if(err) return start.call(self);
-				// TODO
+			// TODO
+			var ep = EventProxy.create('editInfo', 'writeFile', function (editInfo, writeFile){
 				start.call(self);
+			});
+
+			ep.fail(function (err){
+				start.call(self);
+			});
+
+			fs.writeFile(conf.robot.catcher.storage_path + doc.id + conf.robot.catcher.file_suffix, html, function (err){
+				if(err) return ep.emit('error', err);
+				ep.emit('writeFile');
+			});
+
+			// TODO
+			doc.FINISHED = 1;
+			biz.uri.editInfo(doc, function (err, status){
+				if(err) return ep.emit('error', err);
+				ep.emit('editInfo');
 			});
 		});
 	});

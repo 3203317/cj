@@ -75,7 +75,7 @@ exports.findByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_uri (id, URI, CHARSET, HTML, TITLE, TASK_ID, RETRY_COUNT, CREATE_TIME, FINISHED) values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_uri (id, URI, CHARSET, TITLE, TASK_ID, RETRY_COUNT, CREATE_TIME, FINISHED) values (?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -85,7 +85,6 @@ exports.findByTaskId = function(task_id, cb){
 					util.replaceAll(uuid.v1(), '-', ''),
 					newInfo.URI,
 					newInfo.CHARSET,
-					newInfo.HTML,
 					newInfo.TITLE,
 					newInfo.TASK_ID,
 					0,
@@ -106,7 +105,7 @@ exports.findByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_uri set URI=?, CHARSET=?, HTML=?, TITLE=?, TASK_ID=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
+		var sql = 'UPDATE c_uri set URI=?, CHARSET=?, TITLE=?, TASK_ID=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -115,7 +114,6 @@ exports.findByTaskId = function(task_id, cb){
 				var postData = [
 					newInfo.URI,
 					newInfo.CHARSET,
-					newInfo.HTML,
 					newInfo.TITLE,
 					newInfo.TASK_ID,
 					newInfo.RETRY_COUNT,

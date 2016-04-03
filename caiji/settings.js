@@ -19,12 +19,13 @@ module.exports = {
 		password: 'password',
 		connectionLimit: 50,
 	}, html: {
+		storage_path: 'd:\\',
 		virtualPath: '/rvt/',
 		cdn: 'http://www.foreworld.net/',
 		pageSize: 10,
 		cache_time: 1000 * 3
 	}, mail: {
-	secureConnection: true,
+		secureConnection: true,
 		host: 'smtp.163.com',
 		port: 465,
 		to: ['huangxin@foreworld.net'],
@@ -32,7 +33,10 @@ module.exports = {
 			user: 'firefrog@163.com',
 			pass: ''
 		}
-	}, app: {
-		ver: 204
+	}, robot: {
+		catcher: {
+			storage_path: 'd:\\',
+			file_suffix: '.html'
+		}
 	}
 };
