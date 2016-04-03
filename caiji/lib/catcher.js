@@ -60,7 +60,10 @@ function start(){
 
 		// TODO
 		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
-			if(err) return start.call(self);
+			if(err){
+				console.log(err);
+				return start.call(self);
+			}
 
 			// TODO
 			var ep = EventProxy.create('editInfo', 'writeFile', function (editInfo, writeFile){
@@ -101,6 +104,11 @@ function sendReq(uri, charset, cb){
 		var bh = new BufferHelper();
 		// var ct = res.headers['content-type'];
 
+		res.setTimeout(conf.robot.catcher.response_timeout, function(){
+			res.destroy();
+			cb(new Error('res timeout'));
+		});
+
 		res.on('data', function (chunk){
 			bh.concat(chunk);
 		});
@@ -112,6 +120,11 @@ function sendReq(uri, charset, cb){
 		cb(err);
 	}).on('finish', function(){
 		// TODO
+	});
+
+	req.setTimeout(conf.robot.catcher.request_timeout, function(){
+		req.destroy();
+		cb(new Error('req timeout'));
 	});
 
 	req.end();
