@@ -10,6 +10,8 @@ var fs = require('fs');
 var util = require('util');
 var utils = require('speedt-utils');
 
+var path = require('path');
+
 var http = require('http');
 var https = require('https');
 var url = require('url');
@@ -25,6 +27,8 @@ var biz = {
 
 var STATE_START   = 1;
 var STATE_STOPED  = 2;
+
+var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
 
 module.exports = function(opts){
 	return new Component(opts);
@@ -73,7 +77,7 @@ function start(){
 				if(err) return start.call(self);
 				console.log('[%s] 入库.', utils.format());
 				// TODO
-				fs.writeFile(conf.robot.catcher.storage_path + doc.id + conf.robot.catcher.file_suffix, html, function (err){
+				fs.writeFile(STORAGE_PATH +'/'+ doc.id + conf.robot.catcher.file_suffix, html, function (err){
 					if(err) return start.call(self);
 					console.log('[%s] 写入文件.', utils.format());
 					start.call(self);
