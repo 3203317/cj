@@ -35,8 +35,8 @@ module.exports = {
 		}
 	}, robot: {
 		catcher: {
-			request_timeout: 500,
-			response_timeout: 500,
+			request_timeout: 1 * 1000,
+			response_timeout: 1 * 1000,
 			storage_path: 'd:\\',
 			file_suffix: '.html'
 		}

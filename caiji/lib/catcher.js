@@ -61,12 +61,15 @@ function start(){
 		// TODO
 		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
 			if(err){
-				console.log(err);
-				return start.call(self);
+				++doc.RETRY_COUNT;
+				return biz.uri.editInfo(doc, function (err, status){
+					start.call(self);
+				});
 			}
 
 			// TODO
 			var ep = EventProxy.create('editInfo', 'writeFile', function (editInfo, writeFile){
+				console.log('入库并写入文件');
 				start.call(self);
 			});
 
@@ -98,36 +101,44 @@ function start(){
 function sendReq(uri, charset, cb){
 	charset = charset || 'utf-8';
 
-	var req = getReq(uri);
+	(function(){
+		var request = getReq(uri);
 
-	req.on('response', function (res){
-		var bh = new BufferHelper();
-		// var ct = res.headers['content-type'];
+		var req = request(uri, function (res){
+			var bh = new BufferHelper();
+			// var ct = res.headers['content-type'];
 
-		res.setTimeout(conf.robot.catcher.response_timeout, function(){
-			res.destroy();
-			cb(new Error('res timeout'));
+			res.setTimeout(conf.robot.catcher.response_timeout, function(){
+				console.error('响应超时处理');
+			});
+
+			res.on('data', function (chunk){
+				bh.concat(chunk);
+			});
+
+			res.on('end', function(){
+				try{
+					cb(null, iconv.decode(bh.toBuffer(), charset));	
+				}catch(e){
+					cb(e);
+				}
+			});
+
+			res.on('error', function (err){
+				cb(err);
+			});
 		});
 
-		res.on('data', function (chunk){
-			bh.concat(chunk);
+		req.setTimeout(conf.robot.catcher.request_timeout, function(){
+			console.error('请求超时处理');
 		});
 
-		res.on('end', function(){
-			cb(null, iconv.decode(bh.toBuffer(), charset));
+		req.on('error', function (err){
+			cb(err);
 		});
-	}).on('error', function (err){
-		cb(err);
-	}).on('finish', function(){
-		// TODO
-	});
 
-	req.setTimeout(conf.robot.catcher.request_timeout, function(){
-		req.destroy();
-		cb(new Error('req timeout'));
-	});
-
-	req.end();
+		req.end();
+	})();
 }
 
 /**
@@ -137,5 +148,5 @@ function sendReq(uri, charset, cb){
  * @return
  */
 function getReq(uri){
-	return (0 === uri.indexOf('https:')) ? https.request(uri) : http.request(uri);
+	return (0 === uri.indexOf('https:')) ? https.request : http.request;
 }
