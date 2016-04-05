@@ -9,7 +9,6 @@ var fs = require('fs');
 
 var util = require('util');
 var utils = require('speedt-utils');
-var EventProxy = require('eventproxy');
 
 var http = require('http');
 var https = require('https');
@@ -63,30 +62,22 @@ function start(){
 			if(err){
 				++doc.RETRY_COUNT;
 				return biz.uri.editInfo(doc, function (err, status){
+					console.log('[%s] 重试次数+1.', utils.format());
 					start.call(self);
 				});
 			}
 
 			// TODO
-			var ep = EventProxy.create('editInfo', 'writeFile', function (editInfo, writeFile){
-				console.log('入库并写入文件');
-				start.call(self);
-			});
-
-			ep.fail(function (err){
-				start.call(self);
-			});
-
-			fs.writeFile(conf.robot.catcher.storage_path + doc.id + conf.robot.catcher.file_suffix, html, function (err){
-				if(err) return ep.emit('error', err);
-				ep.emit('writeFile');
-			});
-
-			// TODO
 			doc.FINISHED = 1;
 			biz.uri.editInfo(doc, function (err, status){
-				if(err) return ep.emit('error', err);
-				ep.emit('editInfo');
+				if(err) return start.call(self);
+				console.log('[%s] 入库.', utils.format());
+				// TODO
+				fs.writeFile(conf.robot.catcher.storage_path + doc.id + conf.robot.catcher.file_suffix, html, function (err){
+					if(err) return start.call(self);
+					console.log('[%s] 写入文件.', utils.format());
+					start.call(self);
+				});
 			});
 		});
 	});
@@ -119,9 +110,7 @@ function sendReq(uri, charset, cb){
 			res.on('end', function(){
 				try{
 					cb(null, iconv.decode(bh.toBuffer(), charset));	
-				}catch(e){
-					cb(e);
-				}
+				}catch(e){ cb(e); }
 			});
 
 			res.on('error', function (err){
