@@ -54,10 +54,7 @@ function start(){
 				start.call(self);
 				break;
 			case 3:
-				single.call(self, doc);
-				break;
-			case 4:
-				batch.call(self, doc);
+				!doc.BATCH_SCRIPT ? single.call(self, doc) : batch.call(self, doc);
 				break;
 			default:
 				start.call(self);
