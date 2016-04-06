@@ -42,17 +42,20 @@ pro.start = function(cb){
 	if(STATE_START === self.state) return;
 	self.state = STATE_START;
 
-	// TODO
-	if(!self.catcher) self.catcher = new Catcher(self.opts);
-	self.time1 = later.setInterval(function(){
-		self.catcher.start();
-	}, TEXT_SCHED);
+	var sched = { schedules: [{ s: [5] }] };
+	later.date.localTime();
 
 	// TODO
 	if(!self.tasker) self.tasker = new Tasker(self.opts);
 	self.time2 = later.setInterval(function(){
 		self.tasker.start();
 	}, TEXT_SCHED);
+
+	// TODO
+	if(!self.catcher) self.catcher = new Catcher(self.opts);
+	self.time1 = later.setInterval(function(){
+		self.catcher.start();
+	}, sched);
 
 	// TODO
 	process.nextTick(cb);
