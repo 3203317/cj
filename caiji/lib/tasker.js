@@ -83,6 +83,7 @@ function single(doc){
 
 		// TODO
 		var newInfo = {
+			CHARSET: doc.CHARSET,
 			URI: doc.PORTAL_URI,
 			TASK_ID: doc.id
 		};
