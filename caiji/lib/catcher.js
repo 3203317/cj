@@ -25,9 +25,6 @@ var biz = {
 	uri: require('../biz/uri')
 };
 
-var STATE_START   = 1;
-var STATE_STOPED  = 2;
-
 var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
 
 module.exports = function(opts){
@@ -38,6 +35,8 @@ var Component = function(opts){
 	var self = this;
 	opts = opts || {};
 	self.opts = opts;
+	// TODO
+	self.state_running = false;
 };
 
 module.exports = Component;
@@ -45,21 +44,26 @@ var pro = Component.prototype;
 pro.name = '__catcher__';
 
 pro.start = function(){
-	this.state = STATE_START;
-	start.call(this);
+	var self = this;
+	if(self.state_running) return;
+	self.state_running = true;
+	// TODO
+	start.call(self);
 };
 
 pro.stop = function(force){
-	this.state = STATE_STOPED;
+	// TODO
 };
 
 function start(){
 	var self = this;
-	if(STATE_STOPED === self.state) return;
 	// TODO
 	biz.uri.getByFinished(0, function (err, doc){
 		if(err) throw err;
-		if(!doc) return;
+		if(!doc){
+			self.state_running = false;
+			return;
+		}
 
 		// TODO
 		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
@@ -105,7 +109,7 @@ function sendReq(uri, charset, cb){
 			// var ct = res.headers['content-type'];
 
 			res.setTimeout(conf.robot.catcher.response_timeout, function(){
-				console.error('响应超时处理');
+				console.error('[%s] 响应超时处理.', utils.format());
 			});
 
 			res.on('data', function (chunk){
@@ -124,7 +128,7 @@ function sendReq(uri, charset, cb){
 		});
 
 		req.setTimeout(conf.robot.catcher.request_timeout, function(){
-			console.error('请求超时处理');
+			console.error('[%s] 请求超时处理.', utils.format());
 		});
 
 		req.on('error', function (err){

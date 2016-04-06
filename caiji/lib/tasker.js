@@ -13,9 +13,6 @@ var biz = {
 	task: require('../biz/task')
 };
 
-var STATE_START   = 1;
-var STATE_STOPED  = 2;
-
 module.exports = function(opts){
 	return new Component(opts);
 };
@@ -24,6 +21,8 @@ var Component = function(opts){
 	var self = this;
 	opts = opts || {};
 	self.opts = opts;
+	// TODO
+	self.state_running = false;
 };
 
 module.exports = Component;
@@ -31,21 +30,26 @@ var pro = Component.prototype;
 pro.name = '__tasker__';
 
 pro.start = function(){
-	this.state = STATE_START;
-	start.call(this);
+	var self = this;
+	if(self.state_running) return;
+	self.state_running = true;
+	// TODO
+	start.call(self);
 };
 
 pro.stop = function(force){
-	this.state = STATE_STOPED;
+	// TODO
 };
 
 function start(){
 	var self = this;
-	if(STATE_STOPED === self.state) return;
 	// TODO
 	biz.task.getByStartup(1, function (err, doc){
 		if(err) throw err;
-		if(!doc) return;
+		if(!doc){
+			self.state_running = false;
+			return;
+		}
 
 		// TODO
 		switch(doc.CATCH_MODE){
