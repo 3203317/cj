@@ -44,8 +44,8 @@ function start(){
 	if(STATE_STOPED === self.state) return;
 	// TODO
 	biz.task.getByStartup(1, function (err, doc){
-		if(err) return start.call(self);
-		if(!doc) return start.call(self);
+		if(err) throw err;
+		if(!doc) return;
 
 		// TODO
 		switch(doc.CATCH_MODE){
@@ -67,7 +67,7 @@ function updateTaskInfo(doc){
 	var self = this;
 	doc.STARTUP = 0;
 	biz.task.editInfo(doc, function (err, status){
-		if(err) return start.call(self);
+		if(err) throw err;
 		// TODO
 		start.call(self);
 	});
@@ -77,7 +77,7 @@ function single(doc){
 	var self = this;
 	// TODO
 	biz.uri.findByTaskId(doc.id, function (err, docs){
-		if(err) return start.call(self);
+		if(err) throw err;
 		// TODO
 		if(docs && 1 === docs.length) return updateTaskInfo.call(self, doc);
 
@@ -88,7 +88,7 @@ function single(doc){
 		};
 
 		biz.uri.saveNew(newInfo, function (err, status){
-			if(err) return start.call(self);
+			if(err) throw err;
 			// TODO
 			updateTaskInfo.call(self, doc);
 		});

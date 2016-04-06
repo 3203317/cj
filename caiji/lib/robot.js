@@ -8,6 +8,8 @@
 var util = require('util');
 var utils = require('speedt-utils');
 
+var later = require('later');
+
 var conf = require('../settings');
 
 var Catcher = require('./catcher');
@@ -15,6 +17,8 @@ var Tasker = require('./tasker');
 
 var STATE_START   = 1;
 var STATE_STOPED  = 2;
+
+var TEXT_SCHED = later.parse.text('every 1 min');
 
 module.exports = function(opts){
 	return new Component(opts);
@@ -38,11 +42,17 @@ pro.start = function(cb){
 	if(STATE_START === self.state) return;
 	self.state = STATE_START;
 
-	self.catcher = new Catcher(self.opts);
-	self.catcher.start();
+	// TODO
+	if(!self.catcher) self.catcher = new Catcher(self.opts);
+	self.time1 = later.setInterval(function(){
+		self.catcher.start();
+	}, TEXT_SCHED);
 
-	self.tasker = new Tasker(self.opts);
-	self.tasker.start();
+	// TODO
+	if(!self.tasker) self.tasker = new Tasker(self.opts);
+	self.time2 = later.setInterval(function(){
+		self.tasker.start();
+	}, TEXT_SCHED);
 
 	// TODO
 	process.nextTick(cb);
@@ -53,7 +63,7 @@ pro.stop = function(force){
 	// TODO
 	if(STATE_STOPED === self.state) return;
 	self.state = STATE_STOPED;
-	if(self.catcher) self.catcher.stop();
+	if(self.time1) self.time1.clear();
 	// TODO
-	if(self.tasker) self.tasker.stop();
+	if(self.time2) self.time2.clear();
 };

@@ -58,14 +58,15 @@ function start(){
 	if(STATE_STOPED === self.state) return;
 	// TODO
 	biz.uri.getByFinished(0, function (err, doc){
-		if(err) return start.call(self);
-		if(!doc) return start.call(self);
+		if(err) throw err;
+		if(!doc) return;
 
 		// TODO
 		sendReq.call(self, doc.URI, doc.CHARSET, function (err, html){
 			if(err){
 				++doc.RETRY_COUNT;
 				return biz.uri.editInfo(doc, function (err, status){
+					if(err) throw err;
 					console.log('[%s] 重试次数+1.', utils.format());
 					start.call(self);
 				});
@@ -74,11 +75,11 @@ function start(){
 			// TODO
 			doc.FINISHED = 1;
 			biz.uri.editInfo(doc, function (err, status){
-				if(err) return start.call(self);
+				if(err) throw err;
 				console.log('[%s] 入库.', utils.format());
 				// TODO
 				fs.writeFile(STORAGE_PATH +'/'+ doc.id + conf.robot.catcher.file_suffix, html, function (err){
-					if(err) return start.call(self);
+					if(err) throw err;
 					console.log('[%s] 写入文件.', utils.format());
 					start.call(self);
 				});
