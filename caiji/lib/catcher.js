@@ -76,18 +76,39 @@ function start(){
 				});
 			}
 
-			// TODO
-			doc.FINISHED = 1;
-			biz.uri.editInfo(doc, function (err, status){
-				if(err) throw err;
-				console.log('[%s] 入库.', utils.format());
-				// TODO
-				fs.writeFile(STORAGE_PATH +'/'+ doc.id + conf.robot.catcher.file_suffix, html, function (err){
-					if(err) throw err;
-					console.log('[%s] 写入文件.', utils.format());
-					start.call(self);
+			(function(){
+				var newFolder = STORAGE_PATH +'/'+ doc.TASK_ID;
+
+				function editInfo(){
+					doc.FINISHED = 1;
+					biz.uri.editInfo(doc, function (err, status){
+						if(err) throw err;
+						console.log('[%s] 入库.', utils.format());
+						// TODO
+						start.call(self);
+					});
+				}
+
+				function writeFile(){
+					fs.writeFile(newFolder +'/'+ doc.id + conf.robot.catcher.file_suffix, html, function (err){
+						if(err) throw err;
+						console.log('[%s] 写入文件.', utils.format());
+						editInfo();
+					});
+				}
+
+				fs.exists(newFolder, function (exists){
+					if(!exists){
+						return fs.mkdir(newFolder, 777, function (err){
+							if(err) throw err;
+							// TODO
+							writeFile();
+						});
+					}
+					// TODO
+					writeFile();
 				});
-			});
+			})();
 		});
 	});
 }

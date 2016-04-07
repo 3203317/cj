@@ -16,7 +16,9 @@ var EventProxy = require('eventproxy');
 var exports = module.exports;
 
 (function (exports){
-	var sql = 'SELECT a.* FROM c_uri a WHERE a.FINISHED=? AND a.RETRY_COUNT<(SELECT RETRY_COUNT FROM c_task WHERE id=a.TASK_ID) ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
+	var sql = 'SELECT b.RUN_SCRIPT, a.*'+
+				' FROM (SELECT * FROM c_uri WHERE FINISHED=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
+				' WHERE b.id IS NOT NULL AND a.RETRY_COUNT<b.RETRY_COUNT ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
 	 * @params

@@ -58,7 +58,7 @@ function start(){
 				start.call(self);
 				break;
 			case 3:
-				!doc.BATCH_SCRIPT ? single.call(self, doc) : batch.call(self, doc);
+				single.call(self, doc);
 				break;
 			default:
 				start.call(self);
@@ -83,7 +83,7 @@ function single(doc){
 	biz.uri.findByTaskId(doc.id, function (err, docs){
 		if(err) throw err;
 		// TODO
-		if(docs && 1 === docs.length) return updateTaskInfo.call(self, doc);
+		if(docs && 0 < docs.length) return updateTaskInfo.call(self, doc);
 
 		// TODO
 		var newInfo = {
@@ -98,9 +98,4 @@ function single(doc){
 			updateTaskInfo.call(self, doc);
 		});
 	});
-}
-
-function batch(doc){
-	var self = this;
-	start.call(self);
 }
