@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var fs = require('fs');
+
 var util = require('speedt-utils'),
 	uuid = require('node-uuid'),
 	md5 = util.md5,
@@ -13,10 +15,15 @@ var util = require('speedt-utils'),
 
 var EventProxy = require('eventproxy');
 
+var path = require('path');
+var conf = require('../settings');
+
+var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
+
 var exports = module.exports;
 
 (function (exports){
-	var sql = 'SELECT b.RUN_SCRIPT, a.*'+
+	var sql = 'SELECT b.TASK_NAME, a.*'+
 				' FROM (SELECT * FROM c_uri WHERE FINISHED=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
 				' WHERE b.id IS NOT NULL AND a.RETRY_COUNT<b.RETRY_COUNT ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
 	/**
@@ -29,7 +36,25 @@ var exports = module.exports;
 		// TODO
 		mysql.query(sql, [finished], function (err, docs){
 			if(err) return cb(err);
-			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
+			// TODO
+			if(!mysql.checkOnly(docs)) return cb(null);
+
+			(function(){
+				var doc = docs[0];
+				var filePath = STORAGE_PATH +'/'+ doc.TASK_ID +'/run.js';
+
+				// TODO
+				fs.exists(filePath, function (exists){
+					if(!exists) return cb(null, doc);
+					// TODO
+					fs.readFile(filePath, 'utf-8', function (err, data){
+						if(err) return cb(err);
+						// TODO
+						doc.RUN_SCRIPT = data;
+						cb(null, doc);
+					});
+				});
+			})();
 		});
 	};
 })(exports);

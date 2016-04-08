@@ -7,6 +7,8 @@
 
 var fs = require('fs');
 
+var vm = require('vm');
+
 var util = require('util');
 var utils = require('speedt-utils');
 
@@ -71,7 +73,7 @@ function start(){
 				++doc.RETRY_COUNT;
 				return biz.uri.editInfo(doc, function (err, status){
 					if(err) throw err;
-					console.log('[%s] 重试次数+1.', utils.format());
+					console.log('[%s] 重试次数+1', utils.format());
 					start.call(self);
 				});
 			}
@@ -83,17 +85,44 @@ function start(){
 					doc.FINISHED = 1;
 					biz.uri.editInfo(doc, function (err, status){
 						if(err) throw err;
-						console.log('[%s] 入库.', utils.format());
 						// TODO
+						console.log('[%s] 入库', utils.format());
 						start.call(self);
+					});
+				}
+
+				function runScript(){
+					if(!doc.RUN_SCRIPT) return editInfo();
+
+					// TODO
+					var script = vm.createScript(doc.RUN_SCRIPT);
+					// TODO
+					var sandbox = { html: html };
+					script.runInNewContext(sandbox);
+
+					// TODO
+					if(!sandbox.result) return editInfo();
+
+					// TODO
+					var newInfo = {
+						URI: sandbox.result,
+						CHARSET: doc.CHARSET,
+						TASK_ID: doc.TASK_ID
+					};
+
+					biz.uri.saveNew(newInfo, function (err, status){
+						if(err) throw err;
+						// TODO
+						console.log('[%s] 创建下一个地址', utils.format());
+						editInfo();
 					});
 				}
 
 				function writeFile(){
 					fs.writeFile(newFolder +'/'+ doc.id + conf.robot.catcher.file_suffix, html, function (err){
 						if(err) throw err;
-						console.log('[%s] 写入文件.', utils.format());
-						editInfo();
+						console.log('[%s] 写入文件', utils.format());
+						runScript();
 					});
 				}
 
@@ -130,7 +159,7 @@ function sendReq(uri, charset, cb){
 			// var ct = res.headers['content-type'];
 
 			res.setTimeout(conf.robot.catcher.response_timeout, function(){
-				console.error('[%s] 响应超时处理.', utils.format());
+				console.error('[%s] 响应超时处理', utils.format());
 			});
 
 			res.on('data', function (chunk){
@@ -149,7 +178,7 @@ function sendReq(uri, charset, cb){
 		});
 
 		req.setTimeout(conf.robot.catcher.request_timeout, function(){
-			console.error('[%s] 请求超时处理.', utils.format());
+			console.error('[%s] 请求超时处理', utils.format());
 		});
 
 		req.on('error', function (err){
