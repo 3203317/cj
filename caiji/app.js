@@ -81,5 +81,5 @@ server.listen(app.get('port'), function(){
 
 	// TODO
 	var robot = new Robot();
-	robot.start(function(){ console.log('[%s] Robot was started.', util.format()); });
+	robot.start(function(){ console.log('[%s] Robot start.', util.format()); });
 });

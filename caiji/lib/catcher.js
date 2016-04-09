@@ -5,18 +5,13 @@
  */
 'use strict';
 
-var fs = require('fs');
-
 var vm = require('vm');
 
 var util = require('util');
 var utils = require('speedt-utils');
 
-var path = require('path');
-
 var http = require('http');
 var https = require('https');
-var url = require('url');
 
 var BufferHelper = require('bufferhelper');
 var iconv = require('iconv-lite');
@@ -26,8 +21,6 @@ var conf = require('../settings');
 var biz = {
 	uri: require('../biz/uri')
 };
-
-var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
 
 module.exports = function(opts){
 	return new Component(opts);
@@ -57,6 +50,18 @@ pro.stop = function(force){
 	// TODO
 };
 
+function editInfo(doc){
+	var self = this;
+	// TODO
+	doc.FINISHED = 1;
+	biz.uri.editInfo(doc, function (err, status){
+		if(err) throw err;
+		// TODO
+		console.log('[%s] 入库', utils.format());
+		start.call(self);
+	});
+}
+
 function start(){
 	var self = this;
 	// TODO
@@ -78,66 +83,31 @@ function start(){
 				});
 			}
 
-			(function(){
-				var newFolder = STORAGE_PATH +'/'+ doc.TASK_ID;
+			// TODO
+			if(!html) return editInfo.call(self, doc);
 
-				function editInfo(){
-					doc.FINISHED = 1;
-					biz.uri.editInfo(doc, function (err, status){
-						if(err) throw err;
-						// TODO
-						console.log('[%s] 入库', utils.format());
-						start.call(self);
-					});
-				}
+			// 运行脚本
+			var script = vm.createScript(doc.RUN_SCRIPT);
+			// TODO
+			var sandbox = { html: html };
+			script.runInNewContext(sandbox);
+			// TODO
+			if(!sandbox.result) return editInfo.call(self, doc);
 
-				function runScript(){
-					if(!doc.RUN_SCRIPT) return editInfo();
+			// 写入新URI
+			var newInfo = {
+				URI: sandbox.result,
+				CHARSET: doc.CHARSET,
+				TASK_ID: doc.TASK_ID
+			};
 
-					// TODO
-					var script = vm.createScript(doc.RUN_SCRIPT);
-					// TODO
-					var sandbox = { html: html };
-					script.runInNewContext(sandbox);
-
-					// TODO
-					if(!sandbox.result) return editInfo();
-
-					// TODO
-					var newInfo = {
-						URI: sandbox.result,
-						CHARSET: doc.CHARSET,
-						TASK_ID: doc.TASK_ID
-					};
-
-					biz.uri.saveNew(newInfo, function (err, status){
-						if(err) throw err;
-						// TODO
-						console.log('[%s] 创建下一个地址', utils.format());
-						editInfo();
-					});
-				}
-
-				function writeFile(){
-					fs.writeFile(newFolder +'/'+ doc.id + conf.robot.catcher.file_suffix, html, function (err){
-						if(err) throw err;
-						console.log('[%s] 写入文件', utils.format());
-						runScript();
-					});
-				}
-
-				fs.exists(newFolder, function (exists){
-					if(!exists){
-						return fs.mkdir(newFolder, 777, function (err){
-							if(err) throw err;
-							// TODO
-							writeFile();
-						});
-					}
-					// TODO
-					writeFile();
-				});
-			})();
+			// TODO
+			biz.uri.saveNew(newInfo, function (err, status){
+				if(err) throw err;
+				// TODO
+				console.log('[%s] 创建下一个地址', utils.format());
+				editInfo.call(self, doc);
+			});
 		});
 	});
 }
@@ -158,7 +128,7 @@ function sendReq(uri, charset, cb){
 			var bh = new BufferHelper();
 			// var ct = res.headers['content-type'];
 
-			res.setTimeout(conf.robot.catcher.response_timeout, function(){
+			res.setTimeout(conf.robot.timeout.response, function(){
 				console.error('[%s] 响应超时处理', utils.format());
 			});
 
@@ -177,7 +147,7 @@ function sendReq(uri, charset, cb){
 			});
 		});
 
-		req.setTimeout(conf.robot.catcher.request_timeout, function(){
+		req.setTimeout(conf.robot.timeout.request, function(){
 			console.error('[%s] 请求超时处理', utils.format());
 		});
 

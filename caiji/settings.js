@@ -19,8 +19,7 @@ module.exports = {
 		password: 'password',
 		connectionLimit: 50,
 	}, html: {
-		storage_path: 'd:\\',
-		virtualPath: '/rvt/',
+		virtualPath: '/',
 		cdn: 'http://www.foreworld.net/',
 		pageSize: 10,
 		cache_time: 1000 * 3
@@ -34,11 +33,9 @@ module.exports = {
 			pass: ''
 		}
 	}, robot: {
-		catcher: {
-			request_timeout: 3 * 1000,
-			response_timeout: 3 * 1000,
-			storage_path: 'd:\\',
-			file_suffix: '.html'
+		timeout: {
+			request: 3 * 1000,
+			response: 3 * 1000
 		}
 	}
 };

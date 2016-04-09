@@ -5,8 +5,18 @@
  */
 'use strict';
 
+var vm = require('vm');
+
 var util = require('util');
 var utils = require('speedt-utils');
+
+var http = require('http');
+var https = require('https');
+
+var BufferHelper = require('bufferhelper');
+var iconv = require('iconv-lite');
+
+var conf = require('../settings');
 
 var biz = {
 	uri: require('../biz/uri'),
@@ -60,6 +70,9 @@ function start(){
 			case 3:
 				single.call(self, doc);
 				break;
+			case 4:
+				more.call(self, doc);
+				break;
 			default:
 				start.call(self);
 				break;
@@ -80,22 +93,99 @@ function updateTaskInfo(doc){
 function single(doc){
 	var self = this;
 	// TODO
-	biz.uri.findByTaskId(doc.id, function (err, docs){
-		if(err) throw err;
-		// TODO
-		if(docs && 0 < docs.length) return updateTaskInfo.call(self, doc);
+	updateTaskInfo.call(self, doc);
+}
+
+function more(doc){
+	var self = this;
+	// TODO
+	if(!doc.RUN_SCRIPT) return updateTaskInfo.call(self, doc);
+
+	// TODO
+	sendReq.call(self, doc.PORTAL_URI, doc.CHARSET, function (err, html){
+		if(err) return updateTaskInfo.call(self, doc);
 
 		// TODO
+		if(!html) return updateTaskInfo.call(self, doc);
+
+		// 运行脚本
+		var script = vm.createScript(doc.RUN_SCRIPT);
+		// TODO
+		var sandbox = { html: html };
+		script.runInNewContext(sandbox);
+		// TODO
+		if(!sandbox.result) return updateTaskInfo.call(self, doc);
+
+		// 写入新URI
 		var newInfo = {
+			URI: sandbox.result,
 			CHARSET: doc.CHARSET,
-			URI: doc.PORTAL_URI,
 			TASK_ID: doc.id
 		};
 
+		// TODO
 		biz.uri.saveNew(newInfo, function (err, status){
 			if(err) throw err;
 			// TODO
+			console.log('[%s] 创建下一个地址', utils.format());
 			updateTaskInfo.call(self, doc);
 		});
 	});
+}
+
+/**
+ * 返回HTML字符串
+ *
+ * @params
+ * @return
+ */
+function sendReq(uri, charset, cb){
+	charset = charset || 'utf-8';
+
+	(function(){
+		var request = getReq(uri);
+
+		var req = request(uri, function (res){
+			var bh = new BufferHelper();
+			// var ct = res.headers['content-type'];
+
+			res.setTimeout(conf.robot.timeout.response, function(){
+				console.error('[%s] 响应超时处理', utils.format());
+			});
+
+			res.on('data', function (chunk){
+				bh.concat(chunk);
+			});
+
+			res.on('end', function(){
+				try{
+					cb(null, iconv.decode(bh.toBuffer(), charset));	
+				}catch(e){ cb(e); }
+			});
+
+			res.on('error', function (err){
+				cb(err);
+			});
+		});
+
+		req.setTimeout(conf.robot.timeout.request, function(){
+			console.error('[%s] 请求超时处理', utils.format());
+		});
+
+		req.on('error', function (err){
+			cb(err);
+		});
+
+		req.end();
+	})();
+}
+
+/**
+ * 获取http或https
+ *
+ * @params
+ * @return
+ */
+function getReq(uri){
+	return (0 === uri.indexOf('https:')) ? https.request : http.request;
 }

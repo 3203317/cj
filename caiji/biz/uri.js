@@ -18,7 +18,7 @@ var EventProxy = require('eventproxy');
 var path = require('path');
 var conf = require('../settings');
 
-var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
+// var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
 
 var exports = module.exports;
 
@@ -41,16 +41,15 @@ var exports = module.exports;
 
 			(function(){
 				var doc = docs[0];
-				var filePath = STORAGE_PATH +'/'+ doc.TASK_ID +'/run.js';
+				var newPath = path.join(process.cwd(), 'script', doc.TASK_ID +'.js');
 
-				// TODO
-				fs.exists(filePath, function (exists){
+				fs.exists(newPath, function (exists){
 					if(!exists) return cb(null, doc);
 					// TODO
-					fs.readFile(filePath, 'utf-8', function (err, data){
+					fs.readFile(newPath, 'utf-8', function (err, script){
 						if(err) return cb(err);
 						// TODO
-						doc.RUN_SCRIPT = data;
+						doc.RUN_SCRIPT = script;
 						cb(null, doc);
 					});
 				});

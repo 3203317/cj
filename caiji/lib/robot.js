@@ -5,9 +5,6 @@
  */
 'use strict';
 
-var util = require('util');
-var utils = require('speedt-utils');
-
 var later = require('later');
 
 var conf = require('../settings');
@@ -63,13 +60,13 @@ pro.stop = function(force){
 	// TODO
 	if(STATE_STOPED === self.state) return;
 	self.state = STATE_STOPED;
-	if(self.time1) self.time1.clear();
 	// TODO
+	if(self.time1) self.time1.clear();
 	if(self.time2) self.time2.clear();
 };
 
 function getSched1(){
-	return { schedules: [{ s: [5] }] };
+	return { schedules: [{ s: [15, 30, 45] }] };
 }
 
 function getSched2(){
