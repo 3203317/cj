@@ -43,6 +43,7 @@ pro.start = function(){
 	var self = this;
 	if(self.state_running) return;
 	self.state_running = true;
+	console.log('[%s] tasker running', utils.format());
 	// TODO
 	start.call(self);
 };
@@ -58,6 +59,7 @@ function start(){
 		if(err) throw err;
 		if(!doc){
 			self.state_running = false;
+			console.log('[%s] tasker sleep', utils.format());
 			return;
 		}
 

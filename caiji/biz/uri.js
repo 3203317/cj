@@ -18,8 +18,6 @@ var EventProxy = require('eventproxy');
 var path = require('path');
 var conf = require('../settings');
 
-// var STORAGE_PATH = path.join(conf.robot.catcher.storage_path);
-
 var exports = module.exports;
 
 (function (exports){

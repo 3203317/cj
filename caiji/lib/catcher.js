@@ -42,6 +42,7 @@ pro.start = function(){
 	var self = this;
 	if(self.state_running) return;
 	self.state_running = true;
+	console.log('[%s] catcher running', utils.format());
 	// TODO
 	start.call(self);
 };
@@ -69,6 +70,7 @@ function start(){
 		if(err) throw err;
 		if(!doc){
 			self.state_running = false;
+			console.log('[%s] catcher sleep', utils.format());
 			return;
 		}
 
