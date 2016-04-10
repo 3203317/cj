@@ -5,6 +5,9 @@
  */
 'use strict';
 
+var fs = require('fs');
+var path = require('path');
+
 var vm = require('vm');
 
 var util = require('util');
@@ -63,22 +66,38 @@ function start(){
 			return;
 		}
 
-		// TODO
-		switch(doc.CATCH_MODE){
-			case 1:
-			case 2:
-				start.call(self);
-				break;
-			case 3:
-				single.call(self, doc);
-				break;
-			case 4:
-				more.call(self, doc);
-				break;
-			default:
-				start.call(self);
-				break;
+		function run(){
+			switch(doc.CATCH_MODE){
+				case 1:
+				case 2:
+					start.call(self);
+					break;
+				case 3:
+					single.call(self, doc);
+					break;
+				case 4:
+					more.call(self, doc);
+					break;
+				default:
+					start.call(self);
+					break;
+			}
 		}
+
+		(function(){
+			var newFolder = path.join(conf.robot.storagePath, doc.id);
+			// TODO
+			fs.exists(newFolder, function (exists){
+				if(exists) return run();
+				// TODO
+				fs.mkdir(newFolder, 777, function (err){
+					if(err) throw err;
+					// TODO
+					console.log('[%s] 创建目录 %s', utils.format(), doc.id);
+					run();
+				});
+			});
+		})();
 	});
 }
 
@@ -106,31 +125,36 @@ function more(doc){
 	// TODO
 	sendReq.call(self, doc.PORTAL_URI, doc.CHARSET, function (err, html){
 		if(err) return updateTaskInfo.call(self, doc);
-
 		// TODO
 		if(!html) return updateTaskInfo.call(self, doc);
 
-		// 运行脚本
-		var script = vm.createScript(doc.RUN_SCRIPT);
-		// TODO
-		var sandbox = { html: html };
-		script.runInNewContext(sandbox);
-		// TODO
-		if(!sandbox.result) return updateTaskInfo.call(self, doc);
-
-		// 写入新URI
-		var newInfo = {
-			URI: sandbox.result,
-			CHARSET: doc.CHARSET,
-			TASK_ID: doc.id
-		};
-
-		// TODO
-		biz.uri.saveNew(newInfo, function (err, status){
+		// 创建第一页HTML
+		fs.writeFile(path.join(conf.robot.storagePath, doc.id, doc.id +'.html'), html, function (err){
 			if(err) throw err;
+			console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
+
+			// 运行脚本
+			var script = vm.createScript(doc.RUN_SCRIPT);
 			// TODO
-			console.log('[%s] 创建下一个地址', utils.format());
-			updateTaskInfo.call(self, doc);
+			var sandbox = { html: html };
+			script.runInNewContext(sandbox);
+			// TODO
+			if(!sandbox.result) return updateTaskInfo.call(self, doc);
+
+			// 写入新URI
+			var newInfo = {
+				URI: sandbox.result,
+				CHARSET: doc.CHARSET,
+				TASK_ID: doc.id
+			};
+
+			// TODO
+			biz.uri.saveNew(newInfo, function (err, status){
+				if(err) throw err;
+				// TODO
+				console.log('[%s] 添加新地址 %s', utils.format(), newInfo.URI);
+				updateTaskInfo.call(self, doc);
+			});
 		});
 	});
 }
@@ -152,7 +176,7 @@ function sendReq(uri, charset, cb){
 			// var ct = res.headers['content-type'];
 
 			res.setTimeout(conf.robot.timeout.response, function(){
-				console.error('[%s] 响应超时处理', utils.format());
+				console.error('[%s] 响应超时 %s', utils.format(), uri);
 			});
 
 			res.on('data', function (chunk){
@@ -171,7 +195,7 @@ function sendReq(uri, charset, cb){
 		});
 
 		req.setTimeout(conf.robot.timeout.request, function(){
-			console.error('[%s] 请求超时处理', utils.format());
+			console.error('[%s] 请求超时 %s', utils.format(), uri);
 		});
 
 		req.on('error', function (err){

@@ -66,9 +66,9 @@ pro.stop = function(force){
 };
 
 function getSched1(){
-	return { schedules: [{ s: [15, 30, 45] }] };
+	return { schedules: [{ s: [15, 45] }] };
 }
 
 function getSched2(){
-	return later.parse.text('every 1 min');
+	return { schedules: [{ s: [0, 30] }] };
 }

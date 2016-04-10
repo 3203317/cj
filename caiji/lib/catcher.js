@@ -5,6 +5,9 @@
  */
 'use strict';
 
+var fs = require('fs');
+var path = require('path');
+
 var vm = require('vm');
 
 var util = require('util');
@@ -58,7 +61,6 @@ function editInfo(doc){
 	biz.uri.editInfo(doc, function (err, status){
 		if(err) throw err;
 		// TODO
-		console.log('[%s] 入库', utils.format());
 		start.call(self);
 	});
 }
@@ -80,7 +82,7 @@ function start(){
 				++doc.RETRY_COUNT;
 				return biz.uri.editInfo(doc, function (err, status){
 					if(err) throw err;
-					console.log('[%s] 重试次数+1', utils.format());
+					console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
 					start.call(self);
 				});
 			}
@@ -88,27 +90,32 @@ function start(){
 			// TODO
 			if(!html) return editInfo.call(self, doc);
 
-			// 运行脚本
-			var script = vm.createScript(doc.RUN_SCRIPT);
-			// TODO
-			var sandbox = { html: html };
-			script.runInNewContext(sandbox);
-			// TODO
-			if(!sandbox.result) return editInfo.call(self, doc);
-
-			// 写入新URI
-			var newInfo = {
-				URI: sandbox.result,
-				CHARSET: doc.CHARSET,
-				TASK_ID: doc.TASK_ID
-			};
-
-			// TODO
-			biz.uri.saveNew(newInfo, function (err, status){
+			fs.writeFile(path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html'), html, function (err){
 				if(err) throw err;
+				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
+
+				// 运行脚本
+				var script = vm.createScript(doc.RUN_SCRIPT);
 				// TODO
-				console.log('[%s] 创建下一个地址', utils.format());
-				editInfo.call(self, doc);
+				var sandbox = { html: html };
+				script.runInNewContext(sandbox);
+				// TODO
+				if(!sandbox.result) return editInfo.call(self, doc);
+
+				// 写入新URI
+				var newInfo = {
+					URI: sandbox.result,
+					CHARSET: doc.CHARSET,
+					TASK_ID: doc.TASK_ID
+				};
+
+				// TODO
+				biz.uri.saveNew(newInfo, function (err, status){
+					if(err) throw err;
+					// TODO
+					console.log('[%s] 添加新地址 %s', utils.format(), newInfo.URI);
+					editInfo.call(self, doc);
+				});
 			});
 		});
 	});
@@ -131,7 +138,7 @@ function sendReq(uri, charset, cb){
 			// var ct = res.headers['content-type'];
 
 			res.setTimeout(conf.robot.timeout.response, function(){
-				console.error('[%s] 响应超时处理', utils.format());
+				console.error('[%s] 响应超时 %s', utils.format(), uri);
 			});
 
 			res.on('data', function (chunk){
@@ -150,7 +157,7 @@ function sendReq(uri, charset, cb){
 		});
 
 		req.setTimeout(conf.robot.timeout.request, function(){
-			console.error('[%s] 请求超时处理', utils.format());
+			console.error('[%s] 请求超时 %s', utils.format(), uri);
 		});
 
 		req.on('error', function (err){

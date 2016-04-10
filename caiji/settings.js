@@ -33,6 +33,7 @@ module.exports = {
 			pass: ''
 		}
 	}, robot: {
+		storagePath: 'd://',
 		timeout: {
 			request: 3 * 1000,
 			response: 3 * 1000
