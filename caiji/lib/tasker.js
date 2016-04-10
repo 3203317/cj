@@ -21,6 +21,8 @@ var iconv = require('iconv-lite');
 
 var conf = require('../settings');
 
+var sendReq = require('./sendReq');
+
 var biz = {
 	uri: require('../biz/uri'),
 	task: require('../biz/task')
@@ -123,7 +125,7 @@ function more(doc){
 	if(!doc.RUN_SCRIPT) return updateTaskInfo.call(self, doc);
 
 	// TODO
-	sendReq.call(self, doc.PORTAL_URI, doc.CHARSET, function (err, html){
+	sendReq(doc.PORTAL_URI, doc.CHARSET, function (err, html){
 		if(err) return updateTaskInfo.call(self, doc);
 		// TODO
 		if(!html) return updateTaskInfo.call(self, doc);
@@ -157,61 +159,4 @@ function more(doc){
 			});
 		});
 	});
-}
-
-/**
- * 返回HTML字符串
- *
- * @params
- * @return
- */
-function sendReq(uri, charset, cb){
-	charset = charset || 'utf-8';
-
-	(function(){
-		var request = getReq(uri);
-
-		var req = request(uri, function (res){
-			var bh = new BufferHelper();
-			// var ct = res.headers['content-type'];
-
-			res.setTimeout(conf.robot.timeout.response, function(){
-				console.error('[%s] 响应超时 %s', utils.format(), uri);
-			});
-
-			res.on('data', function (chunk){
-				bh.concat(chunk);
-			});
-
-			res.on('end', function(){
-				try{
-					cb(null, iconv.decode(bh.toBuffer(), charset));	
-				}catch(e){ cb(e); }
-			});
-
-			res.on('error', function (err){
-				cb(err);
-			});
-		});
-
-		req.setTimeout(conf.robot.timeout.request, function(){
-			console.error('[%s] 请求超时 %s', utils.format(), uri);
-		});
-
-		req.on('error', function (err){
-			cb(err);
-		});
-
-		req.end();
-	})();
-}
-
-/**
- * 获取http或https
- *
- * @params
- * @return
- */
-function getReq(uri){
-	return (0 === uri.indexOf('https:')) ? https.request : http.request;
 }
