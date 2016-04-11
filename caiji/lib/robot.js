@@ -10,7 +10,6 @@ var later = require('later');
 var conf = require('../settings');
 
 var Catcher = require('./catcher');
-var Tasker = require('./tasker');
 
 var STATE_START   = 1;
 var STATE_STOPED  = 2;
@@ -40,12 +39,6 @@ pro.start = function(cb){
 	self.state = STATE_START;
 
 	// TODO
-	if(!self.tasker) self.tasker = new Tasker(self.opts);
-	self.time2 = later.setInterval(function(){
-		self.tasker.start();
-	}, getSched2());
-
-	// TODO
 	if(!self.catcher) self.catcher = new Catcher(self.opts);
 	self.time1 = later.setInterval(function(){
 		self.catcher.start();
@@ -62,13 +55,8 @@ pro.stop = function(force){
 	self.state = STATE_STOPED;
 	// TODO
 	if(self.time1) self.time1.clear();
-	if(self.time2) self.time2.clear();
 };
 
 function getSched1(){
-	return { schedules: [{ s: [15, 45] }] };
-}
-
-function getSched2(){
-	return { schedules: [{ s: [0, 30] }] };
+	return { schedules: [{ s: [0, 15, 30, 45] }] };
 }

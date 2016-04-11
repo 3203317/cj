@@ -92,32 +92,36 @@ function start(){
 			// TODO
 			if(!html) return editInfo.call(self, doc);
 
+			// TODO
 			fs.writeFile(path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html'), html, function (err){
 				if(err) throw err;
 				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
 
 				// 运行脚本
-				var script = vm.createScript(doc.RUN_SCRIPT);
+				var script = vm.createScript(doc.SCRIPT);
 				// TODO
-				var sandbox = { html: html };
+				var sandbox = {
+					RUN_SCRIPT: doc.RUN_SCRIPT,
+					html: html
+				};
 				script.runInNewContext(sandbox);
 				// TODO
 				if(!sandbox.result) return editInfo.call(self, doc);
+				if(0 === sandbox.result.length) return editInfo.call(self, doc);
 
-				// 写入新URI
-				var newInfo = {
-					URI: sandbox.result,
-					CHARSET: doc.CHARSET,
-					TASK_ID: doc.TASK_ID
-				};
+				(function(){
+					for(var i in sandbox.result){
+						var uri = sandbox.result[i];
+						uri.CHARSET = doc.CHARSET;
+						uri.TASK_ID = doc.TASK_ID;
+					}
 
-				// TODO
-				biz.uri.saveNew(newInfo, function (err, status){
-					if(err) throw err;
-					// TODO
-					console.log('[%s] 添加新地址 %s', utils.format(), newInfo.URI);
-					editInfo.call(self, doc);
-				});
+					biz.uri.batchSaveNew(sandbox.result, function (err){
+						if(err) throw err;
+						// TODO
+						editInfo.call(self, doc);
+					})
+				})();
 			});
 		});
 	});

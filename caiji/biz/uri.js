@@ -20,6 +20,20 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
+function getScript(run_script, cb){
+	var newPath = path.join(process.cwd(), 'script', run_script);
+	// TODO
+	fs.exists(newPath, function (exists){
+		if(!exists) return cb(null);
+		// TODO
+		fs.readFile(newPath, 'utf-8', function (err, script){
+			if(err) return cb(err);
+			// TODO
+			cb(null, script);
+		});
+	});
+}
+
 (function (exports){
 	var sql = 'SELECT b.TASK_NAME, a.*'+
 				' FROM (SELECT * FROM c_uri WHERE FINISHED=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
@@ -39,17 +53,12 @@ var exports = module.exports;
 
 			(function(){
 				var doc = docs[0];
-				var newPath = path.join(process.cwd(), 'script', doc.TASK_ID +'.js');
-
-				fs.exists(newPath, function (exists){
-					if(!exists) return cb(null, doc);
+				// TODO
+				getScript(doc.RUN_SCRIPT, function (err, script){
+					if(err) return cb(err);
 					// TODO
-					fs.readFile(newPath, 'utf-8', function (err, script){
-						if(err) return cb(err);
-						// TODO
-						doc.RUN_SCRIPT = script;
-						cb(null, doc);
-					});
+					doc.SCRIPT = script;
+					cb(null, doc);
 				});
 			})();
 		});
@@ -65,7 +74,19 @@ exports.getById = function(id, cb){
 	// TODO
 	mysql_util.find(null, 'c_uri', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
-		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
+		// TODO
+		if(!mysql.checkOnly(docs)) return cb(null);
+
+		(function(){
+			var doc = docs[0];
+			// TODO
+			getScript(doc.RUN_SCRIPT, function (err, script){
+				if(err) return cb(err);
+				// TODO
+				doc.SCRIPT = script;
+				cb(null, doc);
+			});
+		})();
 	});
 };
 
@@ -99,7 +120,7 @@ exports.findByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_uri (id, URI, CHARSET, TITLE, TASK_ID, RETRY_COUNT, CREATE_TIME, FINISHED) values (?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_uri (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, RUN_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -110,14 +131,64 @@ exports.findByTaskId = function(task_id, cb){
 					newInfo.URI,
 					newInfo.CHARSET,
 					newInfo.TITLE,
-					newInfo.TASK_ID,
 					0,
 					new Date(),
-					0
+					0,
+					newInfo.TASK_ID,
+					newInfo.RUN_SCRIPT,
+					newInfo.DEPTH
 				];
 				mysql.query(sql, postData, function (err, status){
 					if(err) return cb(err);
 					cb(null, status);
+				});
+			});
+		};
+
+		exports.batchSaveNew = function(newInfos, cb){
+			var self = this;
+
+			if(!newInfos) return cb(null);
+			if(0 === newInfos.length) return cb(null);
+
+			// TODO
+			mysql.getPool(function (err, conn){
+				if(err) return cb(err);
+				// TODO
+				conn.beginTransaction(function (err){
+					if(err) return cb(err);
+					// TODO
+					(function(){
+						var i = 0;
+
+						function getNewInfo(){
+							return newInfos[i++];
+						}
+
+						function run(){
+							var newInfo = getNewInfo();
+							if(!newInfo){
+								return conn.commit(function (err){
+									if(err){
+										return conn.rollback(function(){
+											cb(err);
+										});
+									} // END
+									cb(null);
+								});
+							}
+
+							self.saveNew(newInfo, function (err, status){
+								if(err){
+									return conn.rollback(function(){
+										cb(err);
+									});
+								} // END
+								run();
+							});
+						} // END
+						run();
+					})();
 				});
 			});
 		};
