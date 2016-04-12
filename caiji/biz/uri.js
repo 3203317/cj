@@ -148,8 +148,7 @@ exports.findByTaskId = function(task_id, cb){
 		exports.batchSaveNew = function(newInfos, cb){
 			var self = this;
 
-			if(!newInfos) return cb(null);
-			if(0 === newInfos.length) return cb(null);
+			if(!newInfos || 0 === newInfos.length) return cb(null);
 
 			// TODO
 			mysql.getPool(function (err, conn){

@@ -14,6 +14,8 @@ var util = require('speedt-utils'),
 var path = require('path');
 var fs = require('fs');
 
+var conf = require('../settings');
+
 var exports = module.exports;
 
 function getScript(id, cb){
@@ -103,18 +105,37 @@ exports.getById = function(id, cb){
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
-				if(err) return cb(err);				
-				// CREATE
-				var postData = [
-					util.replaceAll(uuid.v1(), '-', ''),
-					newInfo.TASK_NAME,
-					new Date(),
-					0
-				];
-				mysql.query(sql, postData, function (err, status){
-					if(err) return cb(err);
-					cb(null, status);
-				});
+				if(err) return cb(err);
+
+				function run(id){
+					// CREATE
+					var postData = [
+						id,
+						newInfo.TASK_NAME,
+						new Date(),
+						0
+					];
+					mysql.query(sql, postData, function (err, status){
+						if(err) return cb(err);
+						cb(null, status);
+					});
+				} // END
+
+				(function(){
+					var id = util.replaceAll(uuid.v1(), '-', '');
+					var newFolder = path.join(conf.robot.storagePath, id);
+					// TODO
+					fs.exists(newFolder, function (exists){
+						if(exists) return run(id);
+						// TODO
+						fs.mkdir(newFolder, 777, function (err){
+							if(err) return cb(err);
+							// TODO
+							console.log('[%s] 创建目录 %s', util.format(), id);
+							run(id);
+						});
+					}); // END
+				})();
 			});
 		};
 	})(exports);

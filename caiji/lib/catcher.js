@@ -106,8 +106,7 @@ function start(){
 				};
 				script.runInNewContext(sandbox);
 				// TODO
-				if(!sandbox.result) return editInfo.call(self, doc);
-				if(0 === sandbox.result.length) return editInfo.call(self, doc);
+				if(!sandbox.result || 0 === sandbox.result.length) return editInfo.call(self, doc);
 
 				(function(){
 					for(var i in sandbox.result){
