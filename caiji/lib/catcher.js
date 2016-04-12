@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var cheerio = require('cheerio');
+
 var fs = require('fs');
 var path = require('path');
 
@@ -97,10 +99,13 @@ function start(){
 				if(err) throw err;
 				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
 
+				if(!doc.RUN_SCRIPT) return editInfo.call(self, doc);
+
 				// 运行脚本
 				var script = vm.createScript(doc.SCRIPT);
 				// TODO
 				var sandbox = {
+					cheerio: cheerio,
 					console: console,
 					RUN_SCRIPT: doc.RUN_SCRIPT,
 					html: html

@@ -21,6 +21,8 @@ var conf = require('../settings');
 var exports = module.exports;
 
 function getScript(run_script, cb){
+	if(!run_script) return cb(null);
+
 	var newPath = path.join(process.cwd(), 'script', run_script);
 	// TODO
 	fs.exists(newPath, function (exists){
