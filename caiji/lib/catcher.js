@@ -101,6 +101,7 @@ function start(){
 				var script = vm.createScript(doc.SCRIPT);
 				// TODO
 				var sandbox = {
+					console: console,
 					RUN_SCRIPT: doc.RUN_SCRIPT,
 					html: html
 				};
