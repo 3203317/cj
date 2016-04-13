@@ -38,7 +38,7 @@ function getScript(run_script, cb){
 
 (function (exports){
 	var sql = 'SELECT b.TASK_NAME, a.*'+
-				' FROM (SELECT * FROM c_uri WHERE FINISHED=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
+				' FROM (SELECT * FROM c_resource WHERE FINISHED=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
 				' WHERE b.id IS NOT NULL AND a.RETRY_COUNT<b.RETRY_COUNT ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
@@ -74,7 +74,7 @@ function getScript(run_script, cb){
  */
 exports.getById = function(id, cb){
 	// TODO
-	mysql_util.find(null, 'c_uri', [['id', '=', id]], null, null, function (err, docs){
+	mysql_util.find(null, 'c_resource', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		// TODO
 		if(!mysql.checkOnly(docs)) return cb(null);
@@ -99,7 +99,7 @@ exports.getById = function(id, cb){
  */
 exports.findByTaskId = function(task_id, cb){
 	// TODO
-	mysql_util.find(null, 'c_uri', [['task_id', '=', task_id]], null, null, function (err, docs){
+	mysql_util.find(null, 'c_resource', [['task_id', '=', task_id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		cb(null, docs);
 	});
@@ -122,7 +122,7 @@ exports.findByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_uri (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, RUN_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, RUN_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -201,7 +201,7 @@ exports.findByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_uri set URI=?, CHARSET=?, TITLE=?, TASK_ID=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
+		var sql = 'UPDATE c_resource set URI=?, CHARSET=?, TITLE=?, TASK_ID=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){

@@ -80,7 +80,6 @@ var exports = module.exports;
  * @return
  */
 (function (exports){
-
 	function login(req, res, next){
 		var result = { success: false };
 		var data = req._data;
@@ -104,10 +103,17 @@ var exports = module.exports;
 		});
 	}
 
+	function getData(req, res, next){
+		var result = { success: false };
+		var data = req._data;
+		// TODO
+	}
+
 	exports.index = function(req, res, next){
 	// TODO
 		switch(req.body.command){
 			case 'login': login(req, res, next); break;
+			case 'getData': getData(req, res, next); break;
 			default: res.send({ success: false }); break;
 		}
 	};

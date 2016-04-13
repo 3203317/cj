@@ -26,7 +26,7 @@ var conf = require('../settings');
 var sendReq = require('./sendReq');
 
 var biz = {
-	uri: require('../biz/uri')
+	resource: require('../biz/resource')
 };
 
 module.exports = function(opts){
@@ -62,7 +62,7 @@ function editInfo(doc){
 	var self = this;
 	// TODO
 	doc.FINISHED = 1;
-	biz.uri.editInfo(doc, function (err, status){
+	biz.resource.editInfo(doc, function (err, status){
 		if(err) throw err;
 		// TODO
 		start.call(self);
@@ -72,7 +72,7 @@ function editInfo(doc){
 function start(){
 	var self = this;
 	// TODO
-	biz.uri.getByFinished(0, function (err, doc){
+	biz.resource.getByFinished(0, function (err, doc){
 		if(err) throw err;
 		if(!doc){
 			self.state_running = false;
@@ -84,7 +84,7 @@ function start(){
 		sendReq(doc.URI, doc.CHARSET, function (err, html){
 			if(err){
 				++doc.RETRY_COUNT;
-				return biz.uri.editInfo(doc, function (err, status){
+				return biz.resource.editInfo(doc, function (err, status){
 					if(err) throw err;
 					console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
 					start.call(self);
@@ -116,12 +116,12 @@ function start(){
 
 				(function(){
 					for(var i in sandbox.result){
-						var uri = sandbox.result[i];
-						uri.CHARSET = doc.CHARSET;
-						uri.TASK_ID = doc.TASK_ID;
+						var resource = sandbox.result[i];
+						resource.CHARSET = doc.CHARSET;
+						resource.TASK_ID = doc.TASK_ID;
 					}
 
-					biz.uri.batchSaveNew(sandbox.result, function (err){
+					biz.resource.batchSaveNew(sandbox.result, function (err){
 						if(err) throw err;
 						// TODO
 						editInfo.call(self, doc);
