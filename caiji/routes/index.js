@@ -8,7 +8,27 @@
 var util = require('speedt-utils'),
 	express = util.express;
 
-var user = require('../controllers/user');
+var manage = {
+	user: require('../controllers/manage/user')
+};
+
+var api = {
+	index: require('../controllers/api/index')
+};
+
+function proc_api(app){
+	var index = api.index;
+
+	// api
+	app.post('/api/', express.valiPostData, index.signature_validate, index.index);
+}
+
+function proc_manage(app){
+	var user = manage.user;
+
+	// user
+	app.get('/manage/user/login$', user.loginUI);
+}
 
 /**
  *
@@ -16,5 +36,6 @@ var user = require('../controllers/user');
  * @return
  */
 module.exports = function(app){
-	app.get('/user/login$', user.loginUI);
+	proc_manage(app);
+	proc_api(app);
 };

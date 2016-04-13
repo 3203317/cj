@@ -8,7 +8,7 @@
 var util = require('speedt-utils');
 var EventProxy = require('eventproxy');
 
-var conf = require('../settings');
+var conf = require('../../settings');
 
 /**
  *
