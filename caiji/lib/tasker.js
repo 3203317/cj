@@ -24,7 +24,7 @@ var conf = require('../settings');
 var sendReq = require('./sendReq');
 
 var biz = {
-	uri: require('../biz/uri'),
+	resource: require('../biz/resource'),
 	task: require('../biz/task')
 };
 
@@ -57,6 +57,40 @@ pro.stop = function(force){
 	// TODO
 };
 
+function editInfo(doc){
+	var self = this;
+	// TODO
+	doc.STARTUP = 0;
+	biz.task.editInfo(doc, function (err, status){
+		if(err) throw err;
+		start.call(self);
+	});
+}
+
 function start(){
 	var self = this;
+	// TODO
+	biz.task.getByStartup(1, function (err, doc){
+		if(err) throw err;
+		if(!doc){
+			self.state_running = false;
+			console.log('[%s] tasker sleep', utils.format());
+			return;
+		}
+
+		(function(){
+			var newInfo = {
+				URI: doc.PORTAL_URI,
+				CHARSET: doc.CHARSET,
+				TASK_ID: doc.id,
+				RUN_SCRIPT: doc.RUN_SCRIPT,
+				DEPTH: 1
+			};
+
+			biz.resource.saveNew(newInfo, function (err, status){
+				if(err) throw err;
+				editInfo.call(self, doc);
+			});
+		})();
+	});
 }

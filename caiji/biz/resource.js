@@ -22,8 +22,8 @@ var exports = module.exports;
 
 function getScript(run_script, cb){
 	if(!run_script) return cb(null);
-
-	var newPath = path.join(process.cwd(), 'script', run_script);
+	// TODO
+	var newPath = path.join(process.cwd(), 'script', 'resource', run_script);
 	// TODO
 	fs.exists(newPath, function (exists){
 		if(!exists) return cb(null);
@@ -124,27 +124,27 @@ exports.findByTaskId = function(task_id, cb){
 	(function (exports){
 		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, RUN_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
-		exports.saveNew = function(newInfo, cb){
-			formVali(newInfo, function (err){
-				if(err) return cb(err);				
-				// CREATE
-				var postData = [
-					util.replaceAll(uuid.v1(), '-', ''),
-					newInfo.URI,
-					newInfo.CHARSET,
-					newInfo.TITLE,
-					0,
-					new Date(),
-					0,
-					newInfo.TASK_ID,
-					newInfo.RUN_SCRIPT,
-					newInfo.DEPTH
-				];
-				mysql.query(sql, postData, function (err, status){
-					if(err) return cb(err);
-					cb(null, status);
-				});
+		function saveNew(conn, newInfo, cb){
+			var postData = [
+				util.replaceAll(uuid.v1(), '-', ''),
+				newInfo.URI,
+				newInfo.CHARSET,
+				newInfo.TITLE,
+				0,
+				new Date(),
+				0,
+				newInfo.TASK_ID,
+				newInfo.RUN_SCRIPT,
+				newInfo.DEPTH
+			];
+			conn.query(sql, postData, function (err, status){
+				if(err) return cb(err);
+				cb(null, status);
 			});
+		};
+
+		exports.saveNew = function(newInfo, cb){
+			saveNew(mysql, newInfo, cb);
 		};
 
 		exports.batchSaveNew = function(newInfos, cb){
@@ -179,7 +179,7 @@ exports.findByTaskId = function(task_id, cb){
 								});
 							}
 
-							self.saveNew(newInfo, function (err, status){
+							saveNew(conn, newInfo, function (err, status){
 								if(err){
 									return conn.rollback(function(){
 										cb(err);
@@ -201,7 +201,7 @@ exports.findByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_resource set URI=?, CHARSET=?, TITLE=?, TASK_ID=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
+		var sql = 'UPDATE c_resource set URI=?, CHARSET=?, TITLE=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -211,7 +211,6 @@ exports.findByTaskId = function(task_id, cb){
 					newInfo.URI,
 					newInfo.CHARSET,
 					newInfo.TITLE,
-					newInfo.TASK_ID,
 					newInfo.RETRY_COUNT,
 					newInfo.FINISHED,
 					newInfo.id

@@ -18,20 +18,6 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(id, cb){
-	var newPath = path.join(process.cwd(), 'script', id +'.js');
-	// TODO
-	fs.exists(newPath, function (exists){
-		if(!exists) return cb(null);
-		// TODO
-		fs.readFile(newPath, 'utf-8', function (err, script){
-			if(err) return cb(err);
-			// TODO
-			cb(null, script);
-		});
-	});
-}
-
 (function (exports){
 	var sql = 'SELECT * FROM c_task WHERE STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
@@ -44,18 +30,7 @@ function getScript(id, cb){
 		// TODO
 		mysql.query(sql, [startup], function (err, docs){
 			if(err) return cb(err);
-			// TODO
-			if(!mysql.checkOnly(docs)) return cb(null);
-
-			var doc = docs[0];
-
-			// TODO
-			getScript(doc.id, function (err, script){
-				if(err) return cb(err);
-				// TODO
-				doc.RUN_SCRIPT = script;
-				cb(null, doc);
-			});
+			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
 	};
 })(exports);
@@ -69,18 +44,7 @@ exports.getById = function(id, cb){
 	// TODO
 	mysql_util.find(null, 'c_task', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
-		// TODO
-		if(!mysql.checkOnly(docs)) return cb(null);
-
-		var doc = docs[0];
-
-		// TODO
-		getScript(doc.id, function (err, script){
-			if(err) return cb(err);
-			// TODO
-			doc.RUN_SCRIPT = script;
-			cb(null, doc);
-		});
+		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 	});
 };
 
