@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var exec = require('child_process').exec;
+
 var fs = require('fs');
 var path = require('path');
 
@@ -90,7 +92,17 @@ function start(cb){
 			return console.log('[%s] scheduler sleep', utils.format());
 		}
 
-		// TODO
-		editInfo.call(self, doc, cb);
+		(function(){
+			var id = doc.id;
+			var newFolder = path.join(conf.robot.storagePath, id);
+
+			// 执行windows命令
+			exec('del /F /S /Q *.html', { cwd: newFolder }, function (err){
+				if(err) return cb(err);
+				console.log('[%s] 删除文件 *.html %s', utils.format(), id);
+				// TODO
+				editInfo.call(self, doc, cb);
+			});
+		})();
 	});
 }

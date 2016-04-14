@@ -36,7 +36,7 @@ var exports = module.exports;
 })(exports);
 
 (function (exports){
-	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	var sql = 'SELECT * FROM c_task WHERE STARTUP=? AND SCHEDULE_TIME=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
 	 * @params
@@ -45,7 +45,7 @@ var exports = module.exports;
 	exports.getByScheduleTime = function(schedule_time, cb){
 		schedule_time = schedule_time || 0;
 		// TODO
-		mysql.query(sql, [schedule_time], function (err, docs){
+		mysql.query(sql, [0, schedule_time], function (err, docs){
 			if(err) return cb(err);
 			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
