@@ -51,29 +51,34 @@ pro.start = function(){
 	self.state_running = true;
 	console.log('[%s] catcher running', utils.format());
 	// TODO
-	start.call(self);
+	start.call(self, function (err){
+		if('PROTOCOL_SEQUENCE_TIMEOUT' === err.code || 'ETIMEDOUT' === err.code){
+			self.state_running = false;
+			return console.log('[%s] mysql timeout', utils.format());
+		} // END
+		throw err;
+	});
 };
 
 pro.stop = function(force){
 	// TODO
 };
 
-function editInfo(doc){
+function editInfo(doc, cb){
 	var self = this;
 	// TODO
 	doc.FINISHED = 1;
 	biz.resource.editInfo(doc, function (err, status){
-		if(err) throw err;
-		// TODO
-		start.call(self);
+		if(err) return cb(err);
+		start.call(self, cb);
 	});
 }
 
-function start(){
+function start(cb){
 	var self = this;
 	// TODO
 	biz.resource.getByFinished(0, function (err, doc){
-		if(err) throw err;
+		if(err) return cb(err);
 		if(!doc){
 			self.state_running = false;
 			console.log('[%s] catcher sleep', utils.format());
@@ -85,21 +90,21 @@ function start(){
 			if(err){
 				++doc.RETRY_COUNT;
 				return biz.resource.editInfo(doc, function (err, status){
-					if(err) throw err;
+					if(err) return cb(err);
 					console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
-					start.call(self);
+					start.call(self, cb);
 				});
 			}
 
 			// TODO
-			if(!html) return editInfo.call(self, doc);
+			if(!html) return editInfo.call(self, doc, cb);
 
 			// TODO
 			fs.writeFile(path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html'), html, function (err){
-				if(err) throw err;
+				if(err) return cb(err);
 				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
 
-				if(!doc.RUN_SCRIPT) return editInfo.call(self, doc);
+				if(!doc.RUN_SCRIPT) return editInfo.call(self, doc, cb);
 
 				// 运行脚本
 				var script = vm.createScript(doc.SCRIPT);
@@ -112,7 +117,7 @@ function start(){
 				};
 				script.runInNewContext(sandbox);
 				// TODO
-				if(!sandbox.result || 0 === sandbox.result.length) return editInfo.call(self, doc);
+				if(!sandbox.result || 0 === sandbox.result.length) return editInfo.call(self, doc, cb);
 
 				(function(){
 					for(var i in sandbox.result){
@@ -122,9 +127,8 @@ function start(){
 					}
 
 					biz.resource.batchSaveNew(sandbox.result, function (err){
-						if(err) throw err;
-						// TODO
-						editInfo.call(self, doc);
+						if(err) return cb(err);
+						editInfo.call(self, doc, cb);
 					})
 				})();
 			});

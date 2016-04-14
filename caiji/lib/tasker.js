@@ -50,32 +50,38 @@ pro.start = function(){
 	self.state_running = true;
 	console.log('[%s] tasker running', utils.format());
 	// TODO
-	start.call(self);
+	start.call(self, function (err){
+		if('PROTOCOL_SEQUENCE_TIMEOUT' === err.code || 'ETIMEDOUT' === err.code){
+			self.state_running = false;
+			return console.log('[%s] mysql timeout', utils.format());
+		} // END
+		throw err;
+	});
 };
 
 pro.stop = function(force){
 	// TODO
 };
 
-function editInfo(doc){
+function editInfo(doc, cb){
 	var self = this;
 	// TODO
 	doc.STARTUP = 0;
 	biz.task.editInfo(doc, function (err, status){
-		if(err) throw err;
-		start.call(self);
+		if(err) return cb(err);
+		start.call(self, cb);
 	});
 }
 
-function start(){
+function start(cb){
 	var self = this;
 	// TODO
 	biz.task.getByStartup(1, function (err, doc){
-		if(err) throw err;
+		if(err) return cb(err);
+
 		if(!doc){
 			self.state_running = false;
-			console.log('[%s] tasker sleep', utils.format());
-			return;
+			return console.log('[%s] tasker sleep', utils.format());
 		}
 
 		(function(){
@@ -88,8 +94,8 @@ function start(){
 			};
 
 			biz.resource.saveNew(newInfo, function (err, status){
-				if(err) throw err;
-				editInfo.call(self, doc);
+				if(err) return cb(err);
+				editInfo.call(self, doc, cb);
 			});
 		})();
 	});
