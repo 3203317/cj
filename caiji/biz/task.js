@@ -35,6 +35,23 @@ var exports = module.exports;
 	};
 })(exports);
 
+(function (exports){
+	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	/**
+	 *
+	 * @params
+	 * @return
+	 */
+	exports.getByScheduleTime = function(schedule_time, cb){
+		schedule_time = schedule_time || 0;
+		// TODO
+		mysql.query(sql, [schedule_time], function (err, docs){
+			if(err) return cb(err);
+			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
+		});
+	};
+})(exports);
+
 /**
  *
  * @params
@@ -65,7 +82,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_task (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_task (id, TASK_NAME, SCHEDULE_TIME, CREATE_TIME, STARTUP) values (?, ?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -76,6 +93,7 @@ exports.getById = function(id, cb){
 					var postData = [
 						id,
 						newInfo.TASK_NAME,
+						newInfo.SCHEDULE_TIME,
 						new Date(),
 						0
 					];
@@ -110,7 +128,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_task set TASK_NAME=?, STARTUP=? WHERE id=?';
+		var sql = 'UPDATE c_task set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -118,6 +136,7 @@ exports.getById = function(id, cb){
 				// EDIT
 				var postData = [
 					newInfo.TASK_NAME,
+					newInfo.SCHEDULE_TIME,
 					newInfo.STARTUP,
 					newInfo.id
 				];
