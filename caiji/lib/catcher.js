@@ -52,11 +52,16 @@ pro.start = function(){
 	console.log('[%s] catcher running', utils.format());
 	// TODO
 	start.call(self, function (err){
-		if('PROTOCOL_SEQUENCE_TIMEOUT' === err.code || 'ETIMEDOUT' === err.code){
-			self.state_running = false;
-			return console.log('[%s] mysql timeout', utils.format());
-		} // END
-		throw err;
+		switch(err.code){
+			case 'ECONNREFUSED':
+			case 'ETIMEDOUT':
+			case 'PROTOCOL_SEQUENCE_TIMEOUT':
+				self.state_running = false;
+				console.log('[%s] mysql timeout', utils.format());
+				break;
+			default:
+				throw err;
+		}
 	});
 };
 
