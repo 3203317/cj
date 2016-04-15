@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var exec = require('child_process').exec;
+
 var fs = require('fs');
 var path = require('path');
 
@@ -71,8 +73,8 @@ pro.stop = function(force){
 
 function editInfo(doc, cb){
 	var self = this;
-	// TODO
-	doc.STARTUP = 0;
+	// 采集中
+	doc.STARTUP = 1;
 	biz.task.editInfo(doc, function (err, status){
 		if(err) return cb(err);
 		start.call(self, cb);
@@ -81,8 +83,8 @@ function editInfo(doc, cb){
 
 function start(cb){
 	var self = this;
-	// TODO
-	biz.task.getByStartup(1, function (err, doc){
+	// 停止中
+	biz.task.getByStartup(0, function (err, doc){
 		if(err) return cb(err);
 
 		if(!doc){
@@ -90,7 +92,7 @@ function start(cb){
 			return console.log('[%s] tasker sleep', utils.format());
 		}
 
-		(function(){
+		function run(){
 			var newInfo = {
 				URI: doc.PORTAL_URI,
 				CHARSET: doc.CHARSET,
@@ -102,6 +104,27 @@ function start(cb){
 			biz.resource.saveNew(newInfo, function (err, status){
 				if(err) return cb(err);
 				editInfo.call(self, doc, cb);
+			});
+		}
+
+		function remove(){
+			biz.resource.removeByTaskId(doc.id, function (err, status){
+				if(err) return cb(err);
+				// TODO
+				run();
+			});
+		}
+
+		(function(){
+			var id = doc.id;
+			var newFolder = path.join(conf.robot.storagePath, id);
+
+			// 执行windows命令
+			exec('del /F /S /Q *.html', { cwd: newFolder }, function (err){
+				if(err) return cb(err);
+				console.log('[%s] 删除文件 *.html %s', utils.format(), id);
+				// TODO
+				remove();
 			});
 		})();
 	});

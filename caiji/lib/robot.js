@@ -11,7 +11,6 @@ var conf = require('../settings');
 
 var Catcher = require('./catcher');
 var Tasker = require('./tasker');
-var Scheduler = require('./scheduler');
 
 var STATE_START   = 1;
 var STATE_STOPED  = 2;
@@ -53,12 +52,6 @@ pro.start = function(cb){
 	}, schedule_2);
 
 	// TODO
-	if(!self.scheduler) self.scheduler = new Scheduler(self.opts);
-	self.time_3 = later.setInterval(function(){
-		self.scheduler.start();
-	}, schedule_3);
-
-	// TODO
 	process.nextTick(cb);
 };
 
@@ -70,11 +63,7 @@ pro.stop = function(force){
 	// TODO
 	if(self.time_1) self.time_1.clear();
 	if(self.time_2) self.time_2.clear();
-	if(self.time_3) self.time_3.clear();
 };
 
-var schedule_1 = { schedules: [{ s: [15, 45] }] };
-
-var schedule_2 = { schedules: [{ s: [20, 50] }] };
-
-var schedule_3 = { schedules: [{ s: [0, 30] }] };
+var schedule_1 = { schedules: [{ s: [0, 10, 20, 30, 40, 50] }] };
+var schedule_2 = { schedules: [{ s: [5, 15, 25, 35, 45, 55] }] };

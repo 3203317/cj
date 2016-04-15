@@ -223,3 +223,19 @@ exports.findByTaskId = function(task_id, cb){
 		};
 	})(exports);
 })(exports);
+
+/**
+ *
+ * @params
+ * @return
+ */
+(function (exports){
+	var sql = 'DELETE FROM c_resource WHERE TASK_ID=?';
+	// TODO
+	exports.removeByTaskId = function(task_id, cb){
+		mysql.query(sql, [task_id], function (err, status){
+			if(err) return cb(err);
+			cb(null, status);
+		});
+	};
+})(exports);

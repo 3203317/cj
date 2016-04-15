@@ -19,8 +19,9 @@ var conf = require('../settings');
 var exports = module.exports;
 
 (function (exports){
-	var sql = 'SELECT * FROM c_task WHERE STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	var sql = 'SELECT * FROM c_task WHERE STATUS=? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
+	 * STARTUP 0停止 1采集中 2采集完成 3分析中
 	 *
 	 * @params
 	 * @return
@@ -28,24 +29,7 @@ var exports = module.exports;
 	exports.getByStartup = function(startup, cb){
 		startup = startup || 0;
 		// TODO
-		mysql.query(sql, [startup], function (err, docs){
-			if(err) return cb(err);
-			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
-		});
-	};
-})(exports);
-
-(function (exports){
-	var sql = 'SELECT * FROM c_task WHERE STARTUP=? AND SCHEDULE_TIME=? ORDER BY CREATE_TIME ASC LIMIT 1';
-	/**
-	 *
-	 * @params
-	 * @return
-	 */
-	exports.getByScheduleTime = function(schedule_time, cb){
-		schedule_time = schedule_time || 0;
-		// TODO
-		mysql.query(sql, [0, schedule_time], function (err, docs){
+		mysql.query(sql, [1, startup], function (err, docs){
 			if(err) return cb(err);
 			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
@@ -82,7 +66,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_task (id, TASK_NAME, SCHEDULE_TIME, CREATE_TIME, STARTUP) values (?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_task (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -93,7 +77,6 @@ exports.getById = function(id, cb){
 					var postData = [
 						id,
 						newInfo.TASK_NAME,
-						newInfo.SCHEDULE_TIME,
 						new Date(),
 						0
 					];
@@ -128,7 +111,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_task set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
+		var sql = 'UPDATE c_task set TASK_NAME=?, STARTUP=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -136,7 +119,6 @@ exports.getById = function(id, cb){
 				// EDIT
 				var postData = [
 					newInfo.TASK_NAME,
-					newInfo.SCHEDULE_TIME,
 					newInfo.STARTUP,
 					newInfo.id
 				];
