@@ -26,6 +26,7 @@ var conf = require('../settings');
 var sendReq = require('./sendReq');
 
 var biz = {
+	task: require('../biz/task'),
 	resource: require('../biz/resource')
 };
 
@@ -70,7 +71,15 @@ pro.stop = function(force){
 	// TODO
 };
 
-function editInfo(doc, cb){
+function editTaskInfo(cb){
+	var self = this;
+	// TODO
+	biz.task.editByStartup(1, 2, function (err, status){
+		if(err) return cb(err);
+	});
+}
+
+function editResourceInfo(doc, cb){
 	var self = this;
 	// TODO
 	doc.FINISHED = 1;
@@ -80,37 +89,43 @@ function editInfo(doc, cb){
 	});
 }
 
+function retry(doc, cb){
+	var self = this;
+	// TODO
+	doc.RETRY_COUNT++;
+	biz.resource.editInfo(doc, function (err, status){
+		if(err) return cb(err);
+		console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
+		start.call(self, cb);
+	});
+}
+
 function start(cb){
 	var self = this;
 	// TODO
 	biz.resource.getByFinished(0, function (err, doc){
 		if(err) return cb(err);
+
+		// TODO
 		if(!doc){
 			self.state_running = false;
 			console.log('[%s] catcher sleep', utils.format());
-			return;
+			return editTaskInfo.call(self, cb);
 		}
 
 		// TODO
 		sendReq(doc.URI, doc.CHARSET, function (err, html){
-			if(err){
-				++doc.RETRY_COUNT;
-				return biz.resource.editInfo(doc, function (err, status){
-					if(err) return cb(err);
-					console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
-					start.call(self, cb);
-				});
-			}
+			if(err) return retry.call(self, doc, cb);
 
 			// TODO
-			if(!html) return editInfo.call(self, doc, cb);
+			if(!html) return editResourceInfo.call(self, doc, cb);
 
 			// TODO
 			fs.writeFile(path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html'), html, function (err){
 				if(err) return cb(err);
 				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
 
-				if(!doc.RUN_SCRIPT) return editInfo.call(self, doc, cb);
+				if(!doc.RUN_SCRIPT) return editResourceInfo.call(self, doc, cb);
 
 				// 运行脚本
 				var script = vm.createScript(doc.SCRIPT);
@@ -123,7 +138,7 @@ function start(cb){
 				};
 				script.runInNewContext(sandbox);
 				// TODO
-				if(!sandbox.result || 0 === sandbox.result.length) return editInfo.call(self, doc, cb);
+				if(!sandbox.result || 0 === sandbox.result.length) return editResourceInfo.call(self, doc, cb);
 
 				(function(){
 					for(var i in sandbox.result){
@@ -134,7 +149,7 @@ function start(cb){
 
 					biz.resource.batchSaveNew(sandbox.result, function (err){
 						if(err) return cb(err);
-						editInfo.call(self, doc, cb);
+						editResourceInfo.call(self, doc, cb);
 					})
 				})();
 			});

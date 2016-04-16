@@ -19,9 +19,9 @@ var conf = require('../settings');
 var exports = module.exports;
 
 (function (exports){
-	var sql = 'SELECT * FROM c_task WHERE STATUS=? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
-	 * STARTUP 0停止 1采集中 2采集完成 3分析中
+	 * STARTUP 0停止 1采集ing 2采集完成
 	 *
 	 * @params
 	 * @return
@@ -29,7 +29,7 @@ var exports = module.exports;
 	exports.getByStartup = function(startup, cb){
 		startup = startup || 0;
 		// TODO
-		mysql.query(sql, [1, startup], function (err, docs){
+		mysql.query(sql, [0, startup], function (err, docs){
 			if(err) return cb(err);
 			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
@@ -129,4 +129,20 @@ exports.getById = function(id, cb){
 			});
 		};
 	})(exports);
+})(exports);
+
+/**
+ *
+ * @params
+ * @return
+ */
+(function (exports){
+	var sql = 'UPDATE c_task set STARTUP=? WHERE STARTUP=?';
+	// TODO
+	exports.editByStartup = function(before, after, cb){
+		mysql.query(sql, [after, before], function (err, status){
+			if(err) return cb(err);
+			cb(null, status);
+		});
+	};
 })(exports);
