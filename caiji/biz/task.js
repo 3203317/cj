@@ -21,7 +21,7 @@ var exports = module.exports;
 (function (exports){
 	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
-	 * STARTUP 0停止 1采集ing 2采集完成
+	 * STARTUP 0停止 1采集ing 2分析ing
 	 *
 	 * @params
 	 * @return

@@ -26,7 +26,6 @@ var conf = require('../settings');
 var sendReq = require('./sendReq');
 
 var biz = {
-	analysis: require('../biz/analysis'),
 	resource: require('../biz/resource'),
 	task: require('../biz/task')
 };
@@ -68,11 +67,34 @@ pro.start = function(){
 	});
 };
 
+function editTaskInfo(cb){
+	var self = this;
+	// TODO
+	biz.task.editByStartup(2, 0, function (err, status){
+		if(err) return cb(err);
+	});
+}
+
 pro.stop = function(force){
 	// TODO
 };
 
 function start(cb){
 	var self = this;
-	// 停止中
+	// 采集完成
+	biz.task.getByStartup(2, function (err, doc){
+		if(err) return cb(err);
+
+		if(!doc){
+			self.state_running = false;
+			console.log('[%s] analyzer sleep', utils.format());
+			return editTaskInfo.call(self, cb);
+		}
+
+		// TODO
+		biz.resource.getByTaskId(doc.id, function (err, docs){
+			if(err) return cb(err);
+			// TODO
+		});
+	});
 }

@@ -97,7 +97,7 @@ exports.getById = function(id, cb){
  * @params
  * @return
  */
-exports.findByTaskId = function(task_id, cb){
+exports.getByTaskId = function(task_id, cb){
 	// TODO
 	mysql_util.find(null, 'c_resource', [['task_id', '=', task_id]], null, null, function (err, docs){
 		if(err) return cb(err);

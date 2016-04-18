@@ -11,6 +11,7 @@ var conf = require('../settings');
 
 var Catcher = require('./catcher');
 var Tasker = require('./tasker');
+var Analyzer = require('./analyzer');
 
 var STATE_START   = 1;
 var STATE_STOPED  = 2;
@@ -52,6 +53,12 @@ pro.start = function(cb){
 	}, schedule_2);
 
 	// TODO
+	if(!self.analyzer) self.analyzer = new Analyzer(self.opts);
+	self.time_3 = later.setInterval(function(){
+		self.analyzer.start();
+	}, schedule_3);
+
+	// TODO
 	process.nextTick(cb);
 };
 
@@ -63,7 +70,9 @@ pro.stop = function(force){
 	// TODO
 	if(self.time_1) self.time_1.clear();
 	if(self.time_2) self.time_2.clear();
+	if(self.time_3) self.time_3.clear();
 };
 
-var schedule_1 = { schedules: [{ s: [0, 10, 20, 30, 40, 50] }] };
-var schedule_2 = { schedules: [{ s: [5, 15, 25, 35, 45, 55] }] };
+var schedule_1 = { schedules: [{ s: [0] }] };
+var schedule_2 = { schedules: [{ s: [10] }] };
+var schedule_3 = { schedules: [{ s: [45] }] };
