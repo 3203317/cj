@@ -70,7 +70,7 @@ pro.start = function(){
 function editTaskInfo(cb){
 	var self = this;
 	// TODO
-	biz.task.editByStartup(2, 0, function (err, status){
+	biz.task.editByStartup(2, 0, true, function (err, status){
 		if(err) return cb(err);
 	});
 }
@@ -102,7 +102,7 @@ function attachData(docs, cb){
 
 	function run(){
 		var doc = getNewInfo();
-		if(!doc) return start.call(self);
+		if(!doc) return analysis.call(self, docs);
 
 		// TODO
 		setHtml(doc, function (err){
@@ -142,4 +142,6 @@ function start(cb){
 function analysis(docs){
 	var self = this;
 	// TODO
+	console.log(docs.length);
+	start.call(self);
 }

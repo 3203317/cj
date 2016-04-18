@@ -137,10 +137,12 @@ exports.getById = function(id, cb){
  * @return
  */
 (function (exports){
-	var sql = 'UPDATE c_task set SCHEDULE_TIME=SCHEDULE_TIME-1, STARTUP=? WHERE STARTUP=?';
+	var sql_1 = 'UPDATE c_task set SCHEDULE_TIME=SCHEDULE_TIME-1, STARTUP=? WHERE STARTUP=?';
+	var sql_2 = 'UPDATE c_task set STARTUP=? WHERE STARTUP=?';
+
 	// TODO
-	exports.editByStartup = function(before, after, cb){
-		mysql.query(sql, [after, before], function (err, status){
+	exports.editByStartup = function(before, after, flag, cb){
+		mysql.query((flag ? sql_1 : sql_2), [after, before], function (err, status){
 			if(err) return cb(err);
 			cb(null, status);
 		});
