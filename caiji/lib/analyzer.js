@@ -75,6 +75,45 @@ function editTaskInfo(cb){
 	});
 }
 
+function setHtml(doc, cb){
+	var newPath = path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html');
+	// TODO
+	fs.exists(newPath, function (exists){
+		if(!exists) return cb(null);
+		// TODO
+		fs.readFile(newPath, 'utf-8', function (err, html){
+			if(err) return cb(err);
+			// TODO
+			doc.html = html;
+			cb(null);
+		});
+	});
+}
+
+function attachData(docs, cb){
+	var self = this;
+	// TODO
+
+	var i = 0;
+
+	function getNewInfo(){
+		return docs[i++];
+	}
+
+	function run(){
+		var doc = getNewInfo();
+		if(!doc) return start.call(self);
+
+		// TODO
+		setHtml(doc, function (err){
+			if(err) return cb(err);
+			// TODO
+			run();
+		});
+	} // END
+	run();
+}
+
 pro.stop = function(force){
 	// TODO
 };
@@ -95,6 +134,12 @@ function start(cb){
 		biz.resource.getByTaskId(doc.id, function (err, docs){
 			if(err) return cb(err);
 			// TODO
+			attachData(docs, cb);
 		});
 	});
+}
+
+function analysis(docs){
+	var self = this;
+	// TODO
 }
