@@ -74,7 +74,7 @@ pro.stop = function(force){
 function editTaskInfo(cb){
 	var self = this;
 	// TODO
-	biz.task.editByStartup(1, 2, null, function (err, status){
+	biz.task.editByStartup(1, 2, function (err, status){
 		if(err) return cb(err);
 	});
 }

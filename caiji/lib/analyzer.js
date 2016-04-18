@@ -67,14 +67,6 @@ pro.start = function(){
 	});
 };
 
-function editTaskInfo(cb){
-	var self = this;
-	// TODO
-	biz.task.editByStartup(2, 0, true, function (err, status){
-		if(err) return cb(err);
-	});
-}
-
 function setHtml(doc, cb){
 	var newPath = path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html');
 	// TODO
@@ -102,7 +94,7 @@ function attachData(docs, cb){
 
 	function run(){
 		var doc = getNewInfo();
-		if(!doc) return analysis.call(self, docs);
+		if(!doc) return cb(null);
 
 		// TODO
 		setHtml(doc, function (err){
@@ -127,21 +119,39 @@ function start(cb){
 		if(!doc){
 			self.state_running = false;
 			console.log('[%s] analyzer sleep', utils.format());
-			return editTaskInfo.call(self, cb);
+			return;
 		}
 
 		// TODO
 		biz.resource.getByTaskId(doc.id, function (err, docs){
 			if(err) return cb(err);
-			// TODO
-			attachData(docs, cb);
+
+			// 分析数据
+			analysis.call(self, docs, function (err){
+				if(err) return cb(err);
+
+				// 更新Task
+				(function(){
+					doc.SCHEDULE_TIME--;
+					doc.STARTUP = 0;
+					biz.task.editInfo(doc, function (err, status){
+						if(err) return cb(err);
+						// TODO
+						start.call(self);
+					});
+				})();
+			});
 		});
 	});
 }
 
-function analysis(docs){
+function analysis(docs, cb){
 	var self = this;
 	// TODO
-	console.log(docs.length);
-	start.call(self);
+	attachData.call(self, docs, function (err){
+		if(err) return cb(err);
+		// 开始分析数据
+		console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
+		cb(null);
+	});
 }
