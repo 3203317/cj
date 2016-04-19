@@ -132,24 +132,25 @@ function start(cb){
 			self.state_running = false;
 			console.log('[%s] analyzer sleep', utils.format());
 			return;
-		}
+		} // END
 
+		// 判断分析脚本是否存在
 		if(!doc.ANALYSIS_SCRIPT) return editTaskInfo.call(self, doc, cb);
 
-		// TODO
+		// 根据任务 ID 获取所有的URI资源
 		biz.resource.getByTaskId(doc.id, function (err, docs){
 			if(err) return cb(err);
 
 			// TODO
 			if(!docs || 0 === docs.length) return editTaskInfo.call(self, doc, cb);
 
-			// TODO
+			// 附加 HTML 资源
 			attachData.call(self, docs, function (err){
 				if(err) return cb(err);
 
-				console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
-
-				(function(){
+				// 数据分析
+				function analysis(){
+					console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
 					// 运行脚本
 					var script = vm.createScript(doc.ANALYSIS_SCRIPT);
 					// TODO
@@ -160,9 +161,14 @@ function start(cb){
 					};
 					script.runInNewContext(sandbox);
 					// TODO
-					var result = sandbox.result;
+					return sandbox.result;
+				}
+
+				(function(){
+					var result = analysis();
 					if(!result.success) return editTaskInfo.call(self, doc, cb);
 
+					// TODO
 					var data = JSON.stringify(result);
 
 					// 写入json

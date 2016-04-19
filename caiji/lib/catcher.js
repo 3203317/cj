@@ -127,20 +127,24 @@ function start(cb){
 
 				if(!doc.USE_SCRIPT) return editResourceInfo.call(self, doc, cb);
 
-				// 运行脚本
-				var script = vm.createScript(doc.RESOURCE_SCRIPT);
-				// TODO
-				var sandbox = {
-					cheerio: cheerio,
-					console: console,
-					html: html
-				};
-				script.runInNewContext(sandbox);
-				// TODO
-				var result = sandbox.result;
-				if(!result.success) return editTaskInfo.call(self, doc, cb);
+				function resource(){
+					// 运行脚本
+					var script = vm.createScript(doc.RESOURCE_SCRIPT);
+					// TODO
+					var sandbox = {
+						cheerio: cheerio,
+						console: console,
+						html: html
+					};
+					script.runInNewContext(sandbox);
+					// TODO
+					return sandbox.result;
+				}
 
 				(function(){
+					var result = resource();
+					if(!result.success) return editTaskInfo.call(self, doc, cb);
+
 					for(var i in result.data){
 						var resource = result.data[i];
 						resource.CHARSET = doc.CHARSET;
