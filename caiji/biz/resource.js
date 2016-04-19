@@ -59,7 +59,7 @@ function getScript(run_script, cb){
 				getScript(doc.RUN_SCRIPT, function (err, script){
 					if(err) return cb(err);
 					// TODO
-					doc.SCRIPT = script;
+					doc.RESOURCE_SCRIPT = script;
 					cb(null, doc);
 				});
 			})();

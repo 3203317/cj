@@ -128,7 +128,7 @@ function start(cb){
 				if(!doc.RUN_SCRIPT) return editResourceInfo.call(self, doc, cb);
 
 				// 运行脚本
-				var script = vm.createScript(doc.SCRIPT);
+				var script = vm.createScript(doc.RESOURCE_SCRIPT);
 				// TODO
 				var sandbox = {
 					cheerio: cheerio,

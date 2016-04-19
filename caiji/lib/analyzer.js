@@ -129,9 +129,11 @@ function start(cb){
 			// TODO
 			if(!docs || 0 === docs.length) return start.call(self);
 
-			// 分析数据
-			analysis.call(self, docs, function (err){
+
+			attachData.call(self, docs, function (err){
 				if(err) return cb(err);
+
+				console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
 
 				// 更新Task
 				(function(){
@@ -145,16 +147,5 @@ function start(cb){
 				})();
 			});
 		});
-	});
-}
-
-function analysis(docs, cb){
-	var self = this;
-	// TODO
-	attachData.call(self, docs, function (err){
-		if(err) return cb(err);
-		// 开始分析数据
-		console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
-		cb(null);
 	});
 }

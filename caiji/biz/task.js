@@ -14,14 +14,16 @@ var util = require('speedt-utils'),
 var path = require('path');
 var fs = require('fs');
 
+var EventProxy = require('eventproxy');
+
 var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(run_script, cb){
+function getScript(folder, run_script, cb){
 	if(!run_script) return cb(null);
 	// TODO
-	var newPath = path.join(process.cwd(), 'script', 'analysis', run_script);
+	var newPath = path.join(process.cwd(), 'script', folder, run_script);
 	// TODO
 	fs.exists(newPath, function (exists){
 		if(!exists) return cb(null);
@@ -52,12 +54,29 @@ function getScript(run_script, cb){
 
 			(function(){
 				var doc = docs[0];
+
 				// TODO
-				getScript(doc.RUN_SCRIPT, function (err, script){
-					if(err) return cb(err);
+				var ep = EventProxy.create('analysis', 'resource', function (analysis, resource){
 					// TODO
-					doc.SCRIPT = script;
+					doc.ANALYSIS_SCRIPT = analysis;
+					doc.RESOURCE_SCRIPT = resource;
 					cb(null, doc);
+				});
+
+				ep.fail(function (err){
+					cb(err);
+				});
+
+				getScript('analysis', doc.RUN_SCRIPT, function (err, script){
+					if(err) return ep.emit('error', err);
+					// TODO
+					ep.emit('analysis', script);
+				});
+
+				getScript('resource', doc.RUN_SCRIPT, function (err, script){
+					if(err) return ep.emit('error', err);
+					// TODO
+					ep.emit('resource', script);
 				});
 			})();
 		});
