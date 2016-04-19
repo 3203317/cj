@@ -77,18 +77,7 @@ exports.getById = function(id, cb){
 	mysql_util.find(null, 'c_resource', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		// TODO
-		if(!mysql.checkOnly(docs)) return cb(null);
-
-		(function(){
-			var doc = docs[0];
-			// TODO
-			getScript(doc.RUN_SCRIPT, function (err, script){
-				if(err) return cb(err);
-				// TODO
-				doc.SCRIPT = script;
-				cb(null, doc);
-			});
-		})();
+		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 	});
 };
 

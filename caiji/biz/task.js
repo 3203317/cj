@@ -18,6 +18,22 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
+function getScript(run_script, cb){
+	if(!run_script) return cb(null);
+	// TODO
+	var newPath = path.join(process.cwd(), 'script', 'analysis', run_script);
+	// TODO
+	fs.exists(newPath, function (exists){
+		if(!exists) return cb(null);
+		// TODO
+		fs.readFile(newPath, 'utf-8', function (err, script){
+			if(err) return cb(err);
+			// TODO
+			cb(null, script);
+		});
+	});
+}
+
 (function (exports){
 	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
@@ -31,7 +47,19 @@ var exports = module.exports;
 		// TODO
 		mysql.query(sql, [0, startup], function (err, docs){
 			if(err) return cb(err);
-			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
+			// TODO
+			if(!mysql.checkOnly(docs)) return cb(null);
+
+			(function(){
+				var doc = docs[0];
+				// TODO
+				getScript(doc.RUN_SCRIPT, function (err, script){
+					if(err) return cb(err);
+					// TODO
+					doc.SCRIPT = script;
+					cb(null, doc);
+				});
+			})();
 		});
 	};
 })(exports);
