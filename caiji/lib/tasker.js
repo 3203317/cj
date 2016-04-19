@@ -71,7 +71,7 @@ pro.stop = function(force){
 	// TODO
 };
 
-function editInfo(doc, cb){
+function editTaskInfo(doc, cb){
 	var self = this;
 	// 采集中
 	doc.STARTUP = 1;
@@ -103,7 +103,7 @@ function start(cb){
 
 			biz.resource.saveNew(newInfo, function (err, status){
 				if(err) return cb(err);
-				editInfo.call(self, doc, cb);
+				editTaskInfo.call(self, doc, cb);
 			});
 		}
 

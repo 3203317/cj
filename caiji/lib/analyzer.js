@@ -126,6 +126,9 @@ function start(cb){
 		biz.resource.getByTaskId(doc.id, function (err, docs){
 			if(err) return cb(err);
 
+			// TODO
+			if(!docs || 0 === docs.length) return start.call(self);
+
 			// 分析数据
 			analysis.call(self, docs, function (err){
 				if(err) return cb(err);

@@ -111,7 +111,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_task set TASK_NAME=?, STARTUP=? WHERE id=?';
+		var sql = 'UPDATE c_task set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			formVali(newInfo, function (err){
@@ -119,6 +119,7 @@ exports.getById = function(id, cb){
 				// EDIT
 				var postData = [
 					newInfo.TASK_NAME,
+					newInfo.SCHEDULE_TIME,
 					newInfo.STARTUP,
 					newInfo.id
 				];
