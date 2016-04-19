@@ -20,10 +20,8 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(folder, run_script, cb){
-	if(!run_script) return cb(null);
-	// TODO
-	var newPath = path.join(process.cwd(), 'script', folder, run_script);
+function getScript(folder, id, cb){
+	var newPath = path.join(process.cwd(), 'script', folder, id +'.js');
 	// TODO
 	fs.exists(newPath, function (exists){
 		if(!exists) return cb(null);
@@ -67,13 +65,13 @@ function getScript(folder, run_script, cb){
 					cb(err);
 				});
 
-				getScript('analysis', doc.RUN_SCRIPT, function (err, script){
+				getScript('analysis', doc.id, function (err, script){
 					if(err) return ep.emit('error', err);
 					// TODO
 					ep.emit('analysis', script);
 				});
 
-				getScript('resource', doc.RUN_SCRIPT, function (err, script){
+				getScript('resource', doc.id, function (err, script){
 					if(err) return ep.emit('error', err);
 					// TODO
 					ep.emit('resource', script);
@@ -103,7 +101,7 @@ exports.getById = function(id, cb){
  * @return
  */
 (function (exports){
-	function formVali(newInfo, cb){
+	function frmVali(newInfo, cb){
 		cb(null);
 	}
 
@@ -116,10 +114,12 @@ exports.getById = function(id, cb){
 		var sql = 'INSERT INTO c_task (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
-			formVali(newInfo, function (err){
+			frmVali(newInfo, function (err){
 				if(err) return cb(err);
 
-				function run(id){
+				var id = util.replaceAll(uuid.v1(), '-', '');
+
+				function run(){
 					// CREATE
 					var postData = [
 						id,
@@ -134,17 +134,16 @@ exports.getById = function(id, cb){
 				} // END
 
 				(function(){
-					var id = util.replaceAll(uuid.v1(), '-', '');
 					var newFolder = path.join(conf.robot.storagePath, id);
 					// TODO
 					fs.exists(newFolder, function (exists){
-						if(exists) return run(id);
+						if(exists) return run();
 						// TODO
 						fs.mkdir(newFolder, 777, function (err){
 							if(err) return cb(err);
 							// TODO
 							console.log('[%s] 创建目录 %s', util.format(), id);
-							run(id);
+							run();
 						});
 					}); // END
 				})();
@@ -161,7 +160,7 @@ exports.getById = function(id, cb){
 		var sql = 'UPDATE c_task set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
-			formVali(newInfo, function (err){
+			frmVali(newInfo, function (err){
 				if(err) return cb(err);
 				// EDIT
 				var postData = [

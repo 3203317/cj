@@ -125,7 +125,7 @@ function start(cb){
 				if(err) return cb(err);
 				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
 
-				if(!doc.RUN_SCRIPT) return editResourceInfo.call(self, doc, cb);
+				if(!doc.USE_SCRIPT) return editResourceInfo.call(self, doc, cb);
 
 				// 运行脚本
 				var script = vm.createScript(doc.RESOURCE_SCRIPT);
@@ -133,7 +133,6 @@ function start(cb){
 				var sandbox = {
 					cheerio: cheerio,
 					console: console,
-					RUN_SCRIPT: doc.RUN_SCRIPT,
 					html: html
 				};
 				script.runInNewContext(sandbox);

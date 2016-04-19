@@ -106,6 +106,18 @@ function attachData(docs, cb){
 	run();
 }
 
+function editTaskInfo(doc, cb){
+	var self = this;
+	// TODO
+	doc.SCHEDULE_TIME--;
+	doc.STARTUP = 0;
+	biz.task.editInfo(doc, function (err, status){
+		if(err) return cb(err);
+		// TODO
+		start.call(self);
+	});
+}
+
 pro.stop = function(force){
 	// TODO
 };
@@ -127,23 +139,18 @@ function start(cb){
 			if(err) return cb(err);
 
 			// TODO
-			if(!docs || 0 === docs.length) return start.call(self);
+			if(!docs || 0 === docs.length) return editTaskInfo.call(self, doc, cb);
 
-
+			// TODO
 			attachData.call(self, docs, function (err){
 				if(err) return cb(err);
 
 				console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
 
-				// 更新Task
 				(function(){
-					doc.SCHEDULE_TIME--;
-					doc.STARTUP = 0;
-					biz.task.editInfo(doc, function (err, status){
-						if(err) return cb(err);
-						// TODO
-						start.call(self);
-					});
+					// 运行脚本
+
+					editTaskInfo.call(self, doc, cb);
 				})();
 			});
 		});

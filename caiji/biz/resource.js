@@ -20,10 +20,8 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(run_script, cb){
-	if(!run_script) return cb(null);
-	// TODO
-	var newPath = path.join(process.cwd(), 'script', 'resource', run_script);
+function getScript(id, cb){
+	var newPath = path.join(process.cwd(), 'script', 'resource', id +'.js');
 	// TODO
 	fs.exists(newPath, function (exists){
 		if(!exists) return cb(null);
@@ -56,7 +54,7 @@ function getScript(run_script, cb){
 			(function(){
 				var doc = docs[0];
 				// TODO
-				getScript(doc.RUN_SCRIPT, function (err, script){
+				getScript(doc.TASK_ID, function (err, script){
 					if(err) return cb(err);
 					// TODO
 					doc.RESOURCE_SCRIPT = script;
@@ -101,7 +99,7 @@ exports.getByTaskId = function(task_id, cb){
  * @return
  */
 (function (exports){
-	function formVali(newInfo, cb){
+	function frmVali(newInfo, cb){
 		cb(null);
 	}
 
@@ -111,7 +109,7 @@ exports.getByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, RUN_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, USE_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		function saveNew(conn, newInfo, cb){
 			var postData = [
@@ -123,7 +121,7 @@ exports.getByTaskId = function(task_id, cb){
 				new Date(),
 				0,
 				newInfo.TASK_ID,
-				newInfo.RUN_SCRIPT,
+				newInfo.USE_SCRIPT || 0,
 				newInfo.DEPTH
 			];
 			conn.query(sql, postData, function (err, status){
@@ -193,7 +191,7 @@ exports.getByTaskId = function(task_id, cb){
 		var sql = 'UPDATE c_resource set URI=?, CHARSET=?, TITLE=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
-			formVali(newInfo, function (err){
+			frmVali(newInfo, function (err){
 				if(err) return cb(err);
 				// EDIT
 				var postData = [
