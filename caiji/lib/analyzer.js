@@ -5,7 +5,7 @@
  */
 'use strict';
 
-var exec = require('child_process').exec;
+var cheerio = require('cheerio');
 
 var fs = require('fs');
 var path = require('path');
@@ -134,6 +134,8 @@ function start(cb){
 			return;
 		}
 
+		if(!doc.ANALYSIS_SCRIPT) return editTaskInfo.call(self, doc, cb);
+
 		// TODO
 		biz.resource.getByTaskId(doc.id, function (err, docs){
 			if(err) return cb(err);
@@ -149,8 +151,26 @@ function start(cb){
 
 				(function(){
 					// 运行脚本
+					var script = vm.createScript(doc.ANALYSIS_SCRIPT);
+					// TODO
+					var sandbox = {
+						cheerio: cheerio,
+						console: console,
+						docs: docs
+					};
+					script.runInNewContext(sandbox);
+					// TODO
+					if(!sandbox.result) return editTaskInfo.call(self, doc, cb);
 
-					editTaskInfo.call(self, doc, cb);
+					var result = JSON.stringify(sandbox.result);
+
+					// 写入json
+					fs.writeFile(path.join(conf.robot.storagePath, doc.id, 'result.json'), result, function (err){
+						if(err) return cb(err);
+						console.log('[%s] 创建 %s', utils.format(), 'result.json');
+						// TODO
+						editTaskInfo.call(self, doc, cb);
+					});
 				})();
 			});
 		});
