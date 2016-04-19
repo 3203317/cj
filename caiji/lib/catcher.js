@@ -137,16 +137,17 @@ function start(cb){
 				};
 				script.runInNewContext(sandbox);
 				// TODO
-				if(!sandbox.result || 0 === sandbox.result.length) return editResourceInfo.call(self, doc, cb);
+				var result = sandbox.result;
+				if(!result.success) return editTaskInfo.call(self, doc, cb);
 
 				(function(){
-					for(var i in sandbox.result){
-						var resource = sandbox.result[i];
+					for(var i in result.data){
+						var resource = result.data[i];
 						resource.CHARSET = doc.CHARSET;
 						resource.TASK_ID = doc.TASK_ID;
 					}
 
-					biz.resource.batchSaveNew(sandbox.result, function (err){
+					biz.resource.batchSaveNew(result.data, function (err){
 						if(err) return cb(err);
 						editResourceInfo.call(self, doc, cb);
 					})

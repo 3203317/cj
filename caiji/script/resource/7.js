@@ -3,7 +3,10 @@
  * Copyright(c) 2015 caiji <3203317@qq.com>
  * MIT Licensed
  */
-result = [];
+result = {
+	success: true,
+	data: []
+};
 
 (function(){
 	var $ = cheerio.load(html, { decodeEntities: false });
@@ -13,7 +16,7 @@ result = [];
 		var a = that.find('>a');
 
 		// TODO
-		result.push({
+		result.data.push({
 			TITLE: a.text(),
 			DEPTH: 2,
 			URI: 'http://www.poxiao.com'+ a.attr('href')

@@ -160,14 +160,15 @@ function start(cb){
 					};
 					script.runInNewContext(sandbox);
 					// TODO
-					if(!sandbox.result) return editTaskInfo.call(self, doc, cb);
+					var result = sandbox.result;
+					if(!result.success) return editTaskInfo.call(self, doc, cb);
 
-					var result = JSON.stringify(sandbox.result);
+					var data = JSON.stringify(result);
 
 					// 写入json
-					fs.writeFile(path.join(conf.robot.storagePath, doc.id, 'result.json'), result, function (err){
+					fs.writeFile(path.join(conf.robot.storagePath, doc.id, 'data.json'), data, function (err){
 						if(err) return cb(err);
-						console.log('[%s] 创建 %s', utils.format(), 'result.json');
+						console.log('[%s] 创建 %s', utils.format(), 'data.json');
 						// TODO
 						editTaskInfo.call(self, doc, cb);
 					});
