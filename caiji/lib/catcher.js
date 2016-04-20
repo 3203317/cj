@@ -76,6 +76,9 @@ function editTaskInfo(cb){
 	// TODO
 	biz.task.editByStartup(1, 2, function (err, status){
 		if(err) return cb(err);
+		// TODO
+		self.state_running = false;
+		console.log('[%s] catcher sleep', utils.format());
 	});
 }
 
@@ -107,11 +110,7 @@ function start(cb){
 		if(err) return cb(err);
 
 		// TODO
-		if(!doc){
-			self.state_running = false;
-			console.log('[%s] catcher sleep', utils.format());
-			return editTaskInfo.call(self, cb);
-		}
+		if(!doc) return editTaskInfo.call(self, cb);
 
 		// TODO
 		sendReq(doc.URI, doc.CHARSET, function (err, html){
@@ -143,12 +142,12 @@ function start(cb){
 
 				(function(){
 					var result = resource();
-					if(!result.success) return editTaskInfo.call(self, doc, cb);
+					if(!result.success) return editResourceInfo.call(self, doc, cb);
 
 					for(var i in result.data){
-						var resource = result.data[i];
-						resource.CHARSET = doc.CHARSET;
-						resource.TASK_ID = doc.TASK_ID;
+						var elem = result.data[i];
+						elem.CHARSET = doc.CHARSET;
+						elem.TASK_ID = doc.TASK_ID;
 					}
 
 					biz.resource.batchSaveNew(result.data, function (err){
