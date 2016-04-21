@@ -126,34 +126,32 @@ function start(cb){
 
 				if(!doc.USE_SCRIPT) return editResourceInfo.call(self, doc, cb);
 
-				function resource(){
-					// 运行脚本
-					var script = vm.createScript(doc.RESOURCE_SCRIPT);
-					// TODO
-					var sandbox = {
+				(function(){
+					var ctx = vm.createContext({
 						cheerio: cheerio,
 						console: console,
-						html: html
-					};
-					script.runInNewContext(sandbox);
-					// TODO
-					return sandbox.result;
-				}
+						html: html,
+						cb: function(err, data){
+							if(err) return cb(err);
 
-				(function(){
-					var result = resource();
-					if(!result.success) return editResourceInfo.call(self, doc, cb);
+							// TODO
+							for(var i in data){
+								var elem = data[i];
+								elem.CHARSET = doc.CHARSET;
+								elem.TASK_ID = doc.TASK_ID;
+							}
 
-					for(var i in result.data){
-						var elem = result.data[i];
-						elem.CHARSET = doc.CHARSET;
-						elem.TASK_ID = doc.TASK_ID;
-					}
+							biz.resource.batchSaveNew(data, function (err){
+								if(err) return cb(err);
+								editResourceInfo.call(self, doc, cb);
+							});
+						}
+					});
 
-					biz.resource.batchSaveNew(result.data, function (err){
-						if(err) return cb(err);
-						editResourceInfo.call(self, doc, cb);
-					})
+					// 运行脚本
+					var script = vm.createScript(doc.RESOURCE_SCRIPT);
+
+					script.runInContext(ctx);
 				})();
 			});
 		});
