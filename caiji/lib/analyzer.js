@@ -148,36 +148,28 @@ function start(cb){
 			attachData.call(self, docs, function (err){
 				if(err) return cb(err);
 
-				// 数据分析
-				function analysis(){
-					console.log('[%s] 开始分析数据: %s', utils.format(), docs.length);
-					// 运行脚本
-					var script = vm.createScript(doc.ANALYSIS_SCRIPT);
-					// TODO
-					var sandbox = {
+				(function(){
+					var ctx = vm.createContext({
 						cheerio: cheerio,
 						console: console,
-						docs: docs
-					};
-					script.runInNewContext(sandbox);
-					// TODO
-					return sandbox.result;
-				}
+						docs: docs,
+						cb: function(err, data){
+							if(err) return cb(err);
 
-				(function(){
-					var result = analysis();
-					if(!result.success) return editTaskInfo.call(self, doc, cb);
-
-					// TODO
-					var data = JSON.stringify(result);
-
-					// 写入json
-					fs.writeFile(path.join(conf.robot.storagePath, doc.id, 'data.json'), data, function (err){
-						if(err) return cb(err);
-						console.log('[%s] 创建 %s', utils.format(), 'data.json');
-						// TODO
-						editTaskInfo.call(self, doc, cb);
+							// 写入json
+							fs.writeFile(path.join(conf.robot.storagePath, doc.id, 'data.json'), JSON.stringify(data), function (err){
+								if(err) return cb(err);
+								console.log('[%s] 创建 %s', utils.format(), 'data.json');
+								// TODO
+								editTaskInfo.call(self, doc, cb);
+							});
+						}
 					});
+
+					// 运行脚本
+					var script = vm.createScript(doc.ANALYSIS_SCRIPT);
+
+					script.runInContext(ctx);
 				})();
 			});
 		});
