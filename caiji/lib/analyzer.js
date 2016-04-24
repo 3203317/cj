@@ -6,6 +6,7 @@
 'use strict';
 
 var cheerio = require('cheerio');
+var Spooky = require('spooky');
 
 var fs = require('fs');
 var path = require('path');
@@ -152,8 +153,9 @@ function start(cb){
 					var ctx = vm.createContext({
 						cheerio: cheerio,
 						console: console,
+						Spooky: Spooky,
 						docs: docs,
-						cb: function(err, data){
+						callback: function(err, data){
 							if(err) return cb(err);
 
 							// 写入json
