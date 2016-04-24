@@ -3,6 +3,19 @@
  * Copyright(c) 2015 caiji <3203317@qq.com>
  * MIT Licensed
  */
+// var cheerio = require('cheerio');
+// var Spooky = require('spooky');
+
+// var docs = [{
+// 	DEPTH: 2,
+// 	html: '<html><body></body></html>',
+// 	URI: 'http://www.poxiao.com/movie/41006.html'
+// }];
+
+// function callback(err, data){
+// 	console.log(arguments);
+// };
+
 (function(){
 	function casperjs(uri, cb){
 		var spooky = new Spooky({
@@ -11,6 +24,7 @@
 			}, casper: {
 				logLevel: 'debug',
 				verbose: true,
+				timeout: 1000 * 10,
 				pageSettings: {
 					// outputEncoding: 'gb2312',
 					loadImages: false,
@@ -20,9 +34,7 @@
 		}, function (err){
 			if(err) cb(err);
 			// TODO
-			spooky.start(uri);
-
-			spooky.then(function(){
+			spooky.start(uri, function(){
 				// TODO
 				var newDoc = {};
 
