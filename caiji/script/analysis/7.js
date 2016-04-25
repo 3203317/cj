@@ -37,14 +37,21 @@ function callback(err, data){
 				}
 			}
 		}, function (err){
-			if(err) cb(err);
+			if(err){
+				var e = new Error('Failed to initialize SpookyJS');
+				e.details = err;
+				throw e;
+			}
 			// TODO
-			spooky.start(uri, function(){
+			spooky.start(uri);
+
+			spooky.then(function(){
 				// TODO
 				var newDoc = {};
 
+				// TODO
+				newDoc.TITLE = this.getTitle();
 				newDoc.INTRO = this.getHTML('p.inner_content');
-
 				newDoc.OTHER = this.evaluate(function(){
 					return __utils__.findOne('#button').getAttribute('value');
 				});
@@ -53,9 +60,7 @@ function callback(err, data){
 				this.emit('newDoc', newDoc);
 			});
 
-			spooky.run(function(){
-				this.exit();
-			});
+			spooky.run();
 		});
 
 		// spooky.on('console', function (line){
@@ -67,7 +72,7 @@ function callback(err, data){
 		});
 
 		spooky.on('newDoc', function (newDoc){
-			// console.log('[%s] 获取数据 %s', utils.format(), newDoc.TITLE);
+			console.log('[%s] 获取数据 %s', (new Date().getTime()), newDoc.TITLE);
 			cb(null, newDoc);
 		});
 	}
