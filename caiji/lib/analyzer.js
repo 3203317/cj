@@ -153,6 +153,7 @@ function start(cb){
 					var ctx = vm.createContext({
 						cheerio: cheerio,
 						console: console,
+						utils: utils,
 						Spooky: Spooky,
 						docs: docs,
 						callback: function(err, data){

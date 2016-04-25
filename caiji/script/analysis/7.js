@@ -3,18 +3,23 @@
  * Copyright(c) 2015 caiji <3203317@qq.com>
  * MIT Licensed
  */
-// var cheerio = require('cheerio');
-// var Spooky = require('spooky');
+var cheerio = require('cheerio');
+var Spooky = require('spooky');
 
-// var docs = [{
-// 	DEPTH: 2,
-// 	html: '<html><body></body></html>',
-// 	URI: 'http://www.poxiao.com/movie/41006.html'
-// }];
+var docs = [{
+	DEPTH: 2,
+	html: '<html><body></body></html>',
+	URI: 'http://www.poxiao.com/movie/41006.html'
+}, {
+	DEPTH: 2,
+	html: '<html><body></body></html>',
+	URI: 'http://www.poxiao.com/movie/40978.html'
+}];
 
-// function callback(err, data){
-// 	console.log(arguments);
-// };
+function callback(err, data){
+	if(err) return console.log(err);
+	console.log(data);
+};
 
 (function(){
 	function casperjs(uri, cb){
@@ -48,7 +53,9 @@
 				this.emit('newDoc', newDoc);
 			});
 
-			spooky.run();
+			spooky.run(function(){
+				this.exit();
+			});
 		});
 
 		// spooky.on('console', function (line){
@@ -60,6 +67,7 @@
 		});
 
 		spooky.on('newDoc', function (newDoc){
+			// console.log('[%s] 获取数据 %s', utils.format(), newDoc.TITLE);
 			cb(null, newDoc);
 		});
 	}
