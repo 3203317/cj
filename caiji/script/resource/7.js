@@ -4,8 +4,12 @@
  * MIT Licensed
  */
 (function(){
+	// TODO
+	if(2 === doc.DEPTH) return callback(null);
+
+	// TODO
 	var data = [];
-	var $ = cheerio.load(html, { decodeEntities: false });
+	var $ = cheerio.load(doc.html, { decodeEntities: false });
 
 	$('#indextopleft').find('li').each(function (i, elem){
 		var that = $(this);
@@ -20,5 +24,5 @@
 	}); // END
 
 	// TODO
-	cb(null, data);
+	callback(null, data);
 })(); // END

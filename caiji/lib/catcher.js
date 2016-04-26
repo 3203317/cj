@@ -6,6 +6,7 @@
 'use strict';
 
 var cheerio = require('cheerio');
+var Spooky = require('spooky');
 
 var fs = require('fs');
 var path = require('path');
@@ -124,33 +125,36 @@ function start(cb){
 				if(err) return cb(err);
 				console.log('[%s] 创建 %s', utils.format(), doc.id +'.html');
 
-				if(!doc.USE_SCRIPT) return editResourceInfo.call(self, doc, cb);
+				doc.html = html;
 
 				(function(){
 					var ctx = vm.createContext({
 						cheerio: cheerio,
 						console: console,
-						html: html,
-						cb: function(err, data){
+						utils: utils,
+						Spooky: Spooky,
+						doc: doc,
+						callback: function(err, data){
 							if(err) return cb(err);
 
 							// TODO
+							if(!data) return editResourceInfo.call(self, doc, cb);
+
 							for(var i in data){
 								var elem = data[i];
 								elem.CHARSET = doc.CHARSET;
 								elem.TASK_ID = doc.TASK_ID;
-							}
+							} // FOR
 
 							biz.resource.batchSaveNew(data, function (err){
 								if(err) return cb(err);
 								editResourceInfo.call(self, doc, cb);
-							});
+							}); // END
 						}
 					});
 
 					// 运行脚本
 					var script = vm.createScript(doc.RESOURCE_SCRIPT);
-
 					script.runInContext(ctx);
 				})();
 			});

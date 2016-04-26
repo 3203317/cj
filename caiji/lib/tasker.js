@@ -97,7 +97,6 @@ function start(cb){
 				URI: doc.PORTAL_URI,
 				CHARSET: doc.CHARSET,
 				TASK_ID: doc.id,
-				USE_SCRIPT: 1,
 				DEPTH: 1
 			};
 

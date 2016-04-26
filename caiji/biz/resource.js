@@ -109,7 +109,7 @@ exports.getByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, USE_SCRIPT, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		function saveNew(conn, newInfo, cb){
 			var postData = [
@@ -121,7 +121,6 @@ exports.getByTaskId = function(task_id, cb){
 				new Date(),
 				0,
 				newInfo.TASK_ID,
-				newInfo.USE_SCRIPT || 0,
 				newInfo.DEPTH
 			];
 			conn.query(sql, postData, function (err, status){
