@@ -69,99 +69,110 @@ pro.start = function(){
 	});
 };
 
-function setHtml(doc, cb){
-	var newPath = path.join(conf.robot.storagePath, doc.TASK_ID, doc.id +'.html');
-	// TODO
-	fs.exists(newPath, function (exists){
-		if(!exists) return cb(null);
-		// TODO
-		fs.readFile(newPath, 'utf-8', function (err, html){
-			if(err) return cb(err);
-			// TODO
-			doc.html = html;
-			cb(null);
-		});
-	});
-}
-
-function attachData(doc, cb){
-	var self = this;
-	// TODO
-
-	setHtml(doc, function (err){
-		if(err) return cb(err);
-		// TODO
-		cb(null);
-	});
-}
-
-function editTaskInfo(doc, cb){
-	var self = this;
-	// TODO
-	biz.task.editByStartup(true, 2, 0, function (err, status){
-		if(err) return cb(err);
-		// TODO
-		self.state_running = false;
-		console.log('[%s] analyzer sleep', utils.format());
-	});
-}
-
-function editResourceInfo(doc, cb){
-	var self = this;
-	// TODO
-	doc.FINISHED = 2;
-	biz.resource.editInfo(doc, function (err, status){
-		if(err) return cb(err);
-		start.call(self, cb);
-	});
-}
-
 pro.stop = function(force){
 	// TODO
 };
 
-function retry(doc, cb){
+function editResourceInfo(resource, cb){
 	var self = this;
 	// TODO
-	doc.RETRY_COUNT++;
-	biz.resource.editInfo(doc, function (err, status){
+	resource.FINISHED = 2;
+	biz.resource.editInfo(resource, function (err, status){
 		if(err) return cb(err);
-		console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
 		start.call(self, cb);
 	});
 }
 
-function start(cb){
+function writeFile(resource, cb){
 	var self = this;
 	// TODO
-	biz.resource.getByFinished(1, function (err, doc){
+	if(!resource.json) return editResourceInfo.call(self, resource, cb);
+
+	// TODO
+	fs.writeFile(path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.json'), JSON.stringify(resource.json), function (err){
+		if(err) return cb(err);
+		console.log('[%s] 创建 %s', utils.format(), resource.id +'.json');
+		editResourceInfo.call(self, resource, cb);
+	});
+}
+
+function runScript(resource, cb){
+	var self = this;
+	// TODO
+	var ctx = vm.createContext({
+		cheerio: cheerio,
+		console: console,
+		utils: utils,
+		Spooky: Spooky,
+		doc: resource,
+		callback: function(err){
+			if(err) return cb(err);
+			// TODO
+			writeFile.call(self, resource, cb);
+		}
+	});
+
+	// 运行脚本
+	var script = vm.createScript(resource.ANALYSIS_SCRIPT);
+	script.runInContext(ctx);
+}
+
+function attachHtml(resource, cb){
+	var self = this;
+	// TODO
+	var newPath = path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.html');
+	// TODO
+	fs.exists(newPath, function (exists){
+		if(!exists) return runScript.call(self, resource, cb);
+		// TODO
+		fs.readFile(newPath, 'utf-8', function (err, html){
+			if(err) return cb(err);
+			// TODO
+			resource.html = html;
+			runScript.call(self, resource, cb);
+		});
+	});
+}
+
+function editTaskInfo(task, cb){
+	var self = this;
+	// TODO
+	task.SCHEDULE_TIME--;
+	task.STARTUP = 0;
+	biz.task.editInfo(task, function (err, status){
 		if(err) return cb(err);
 		// TODO
-		if(!doc) return editTaskInfo.call(self, cb);
+		start.call(self);
+	});
+}
 
-		// 附加 HTML 资源
-		attachData.call(self, doc, function (err){
-			if(err) return cb(err);
+function getResource(task, cb){
+	var self = this;
+	// TODO
+	biz.resource.getByFinished(1, task.id, function (err, doc){
+		if(err) return cb(err);
+		// TODO
+		if(!doc) return editTaskInfo.call(self, task, cb);
 
-			(function(){
-				var ctx = vm.createContext({
-					cheerio: cheerio,
-					console: console,
-					utils: utils,
-					Spooky: Spooky,
-					doc: doc,
-					callback: function(err){
-						if(err) return cb(err);
-						// TODO
-						console.log(doc.json);
-						editResourceInfo.call(self, doc, cb);
-					}
-				});
+		attachHtml.call(self, doc, cb);
+	});
+}
 
-				// 运行脚本
-				var script = vm.createScript(doc.ANALYSIS_SCRIPT);
-				script.runInContext(ctx);
-			})();
-		});
+function sleep(){
+	this.state_running = false;
+	console.log('[%s] analyzer sleep', utils.format());
+}
+
+function start(cb){
+	var self = this;
+	// 采集中
+	biz.task.getByStartup(2, function (err, doc){
+		if(err) return cb(err);
+
+		// 不存在则休眠
+		if(!doc) return sleep.call(self);
+
+		// 获取一条 resource
+		getResource.call(self, doc, cb);
 	});
 }

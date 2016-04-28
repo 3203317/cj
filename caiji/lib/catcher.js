@@ -61,7 +61,7 @@ pro.start = function(){
 			case 'PROTOCOL_CONNECTION_LOST':
 			case 'CasperError':
 				self.state_running = false;
-				console.log('[%s] mysql timeout: %s', utils.format(), err.code);
+				console.log('[%s] catcher timeout: %s', utils.format(), err.code);
 				break;
 			default:
 				throw err;

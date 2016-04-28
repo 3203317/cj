@@ -59,7 +59,7 @@ pro.start = function(){
 			case 'PROTOCOL_SEQUENCE_TIMEOUT':
 			case 'PROTOCOL_CONNECTION_LOST':
 				self.state_running = false;
-				console.log('[%s] mysql timeout: %s', utils.format(), err.code);
+				console.log('[%s] tasker timeout: %s', utils.format(), err.code);
 				break;
 			default:
 				throw err;
