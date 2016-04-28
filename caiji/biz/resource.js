@@ -20,8 +20,8 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(id, cb){
-	var newPath = path.join(process.cwd(), 'script', 'resource', id +'.js');
+function getScript(folder, id, cb){
+	var newPath = path.join(process.cwd(), 'script', folder, id +'.js');
 	// TODO
 	fs.exists(newPath, function (exists){
 		if(!exists) return cb(null);
@@ -36,29 +36,43 @@ function getScript(id, cb){
 
 (function (exports){
 	var sql = 'SELECT b.TASK_NAME, a.*'+
-				' FROM (SELECT * FROM c_resource WHERE FINISHED=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
+				' FROM (SELECT * FROM c_resource WHERE FINISHED=? AND TASK_ID=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
 				' WHERE b.id IS NOT NULL AND a.RETRY_COUNT<b.RETRY_COUNT ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
 	 * @params
 	 * @return
 	 */
-	exports.getByFinished = function(finished, cb){
-		finished = finished || 0;
+	exports.getByFinished = function(finished, task_id, cb){
 		// TODO
-		mysql.query(sql, [finished], function (err, docs){
+		mysql.query(sql, [finished, task_id], function (err, docs){
 			if(err) return cb(err);
 			// TODO
 			if(!mysql.checkOnly(docs)) return cb(null);
 
 			(function(){
 				var doc = docs[0];
+
 				// TODO
-				getScript(doc.TASK_ID, function (err, script){
-					if(err) return cb(err);
+				var ep = EventProxy.create('analysis', 'resource', function (analysis, resource){
 					// TODO
-					doc.RESOURCE_SCRIPT = script;
+					doc.ANALYSIS_SCRIPT = analysis;
+					doc.RESOURCE_SCRIPT = resource;
 					cb(null, doc);
+				});
+
+				ep.fail(function (err){
+					cb(err);
+				});
+
+				getScript('analysis', doc.TASK_ID, function (err, script){
+					if(err) return ep.emit('error', err);
+					ep.emit('analysis', script);
+				});
+
+				getScript('resource', doc.TASK_ID, function (err, script){
+					if(err) return ep.emit('error', err);
+					ep.emit('resource', script);
 				});
 			})();
 		});

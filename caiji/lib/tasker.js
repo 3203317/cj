@@ -71,14 +71,63 @@ pro.stop = function(force){
 	// TODO
 };
 
-function editTaskInfo(doc, cb){
+function editTaskInfo(task, cb){
 	var self = this;
 	// 采集中
-	doc.STARTUP = 1;
-	biz.task.editInfo(doc, function (err, status){
+	task.STARTUP = 1;
+	biz.task.editInfo(task, function (err, status){
 		if(err) return cb(err);
+		// TODO
 		start.call(self, cb);
 	});
+}
+
+function createNewResource(task, cb){
+	var self = this;
+	// TODO
+	var newInfo = {
+		URI: task.PORTAL_URI,
+		CHARSET: task.CHARSET,
+		TASK_ID: task.id,
+		DEPTH: 1
+	};
+
+	// TODO
+	biz.resource.saveNew(newInfo, function (err, status){
+		if(err) return cb(err);
+		// TODO
+		editTaskInfo.call(self, task, cb);
+	});
+}
+
+function removeResourceByTaskId(task, cb){
+	var self = this;
+	// TODO
+	biz.resource.removeByTaskId(task.id, function (err, status){
+		if(err) return cb(err);
+		// TODO
+		createNewResource.call(self, task, cb);
+	});
+}
+
+function deleteHtmls(task, cb){
+	var self = this;
+	// TODO
+	var id = task.id;
+	var newFolder = path.join(conf.robot.storagePath, id);
+
+	// 执行windows命令
+	exec('del /F /S /Q *.html', { cwd: newFolder }, function (err){
+		if(err) return cb(err);
+		console.log('[%s] 删除文件 *.html %s', utils.format(), id);
+		// TODO
+		removeResourceByTaskId.call(self, task, cb);
+	});
+}
+
+function sleep(){
+	this.state_running = false;
+	console.log('[%s] tasker sleep', utils.format());
 }
 
 function start(cb){
@@ -87,44 +136,10 @@ function start(cb){
 	biz.task.getByStartup(0, function (err, doc){
 		if(err) return cb(err);
 
-		if(!doc){
-			self.state_running = false;
-			return console.log('[%s] tasker sleep', utils.format());
-		}
+		// 不存在则休眠
+		if(!doc) return sleep.call(self);
 
-		function run(){
-			var newInfo = {
-				URI: doc.PORTAL_URI,
-				CHARSET: doc.CHARSET,
-				TASK_ID: doc.id,
-				DEPTH: 1
-			};
-
-			biz.resource.saveNew(newInfo, function (err, status){
-				if(err) return cb(err);
-				editTaskInfo.call(self, doc, cb);
-			});
-		}
-
-		function remove(){
-			biz.resource.removeByTaskId(doc.id, function (err, status){
-				if(err) return cb(err);
-				// TODO
-				run();
-			});
-		}
-
-		(function(){
-			var id = doc.id;
-			var newFolder = path.join(conf.robot.storagePath, id);
-
-			// 执行windows命令
-			exec('del /F /S /Q *.html', { cwd: newFolder }, function (err){
-				if(err) return cb(err);
-				console.log('[%s] 删除文件 *.html %s', utils.format(), id);
-				// TODO
-				remove();
-			});
-		})();
+		// 删除文件夹下的所有 html 文件
+		deleteHtmls.call(self, doc, cb);
 	});
 }

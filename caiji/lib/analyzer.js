@@ -59,8 +59,9 @@ pro.start = function(){
 			case 'ETIMEDOUT':
 			case 'PROTOCOL_SEQUENCE_TIMEOUT':
 			case 'PROTOCOL_CONNECTION_LOST':
+			case 'CasperError':
 				self.state_running = false;
-				console.log('[%s] mysql timeout: %s', utils.format(), err.code);
+				console.log('[%s] analyzer error: %s', utils.format(), err.code);
 				break;
 			default:
 				throw err;
@@ -83,39 +84,35 @@ function setHtml(doc, cb){
 	});
 }
 
-function attachData(docs, cb){
+function attachData(doc, cb){
 	var self = this;
 	// TODO
 
-	var i = 0;
-
-	function getNewInfo(){
-		return docs[i++];
-	}
-
-	function run(){
-		var doc = getNewInfo();
-		if(!doc) return cb(null);
-
+	setHtml(doc, function (err){
+		if(err) return cb(err);
 		// TODO
-		setHtml(doc, function (err){
-			if(err) return cb(err);
-			// TODO
-			run();
-		});
-	} // END
-	run();
+		cb(null);
+	});
 }
 
 function editTaskInfo(doc, cb){
 	var self = this;
 	// TODO
-	doc.SCHEDULE_TIME--;
-	doc.STARTUP = 0;
-	biz.task.editInfo(doc, function (err, status){
+	biz.task.editByStartup(true, 2, 0, function (err, status){
 		if(err) return cb(err);
 		// TODO
-		start.call(self);
+		self.state_running = false;
+		console.log('[%s] analyzer sleep', utils.format());
+	});
+}
+
+function editResourceInfo(doc, cb){
+	var self = this;
+	// TODO
+	doc.FINISHED = 2;
+	biz.resource.editInfo(doc, function (err, status){
+		if(err) return cb(err);
+		start.call(self, cb);
 	});
 }
 
@@ -123,58 +120,48 @@ pro.stop = function(force){
 	// TODO
 };
 
+function retry(doc, cb){
+	var self = this;
+	// TODO
+	doc.RETRY_COUNT++;
+	biz.resource.editInfo(doc, function (err, status){
+		if(err) return cb(err);
+		console.log('[%s] 重试+1 %s', utils.format(), doc.URI);
+		start.call(self, cb);
+	});
+}
+
 function start(cb){
 	var self = this;
-	// 采集完成
-	biz.task.getByStartup(2, function (err, doc){
+	// TODO
+	biz.resource.getByFinished(1, function (err, doc){
 		if(err) return cb(err);
+		// TODO
+		if(!doc) return editTaskInfo.call(self, cb);
 
-		if(!doc){
-			self.state_running = false;
-			console.log('[%s] analyzer sleep', utils.format());
-			return;
-		} // END
-
-		// 判断分析脚本是否存在
-		if(!doc.ANALYSIS_SCRIPT) return editTaskInfo.call(self, doc, cb);
-
-		// 根据任务 ID 获取所有的URI资源
-		biz.resource.getByTaskId(doc.id, function (err, docs){
+		// 附加 HTML 资源
+		attachData.call(self, doc, function (err){
 			if(err) return cb(err);
 
-			// TODO
-			if(!docs || 0 === docs.length) return editTaskInfo.call(self, doc, cb);
+			(function(){
+				var ctx = vm.createContext({
+					cheerio: cheerio,
+					console: console,
+					utils: utils,
+					Spooky: Spooky,
+					doc: doc,
+					callback: function(err){
+						if(err) return cb(err);
+						// TODO
+						console.log(doc.json);
+						editResourceInfo.call(self, doc, cb);
+					}
+				});
 
-			// 附加 HTML 资源
-			attachData.call(self, docs, function (err){
-				if(err) return cb(err);
-
-				(function(){
-					var ctx = vm.createContext({
-						cheerio: cheerio,
-						console: console,
-						utils: utils,
-						Spooky: Spooky,
-						docs: docs,
-						callback: function(err, data){
-							if(err) return cb(err);
-
-							// 写入json
-							fs.writeFile(path.join(conf.robot.storagePath, doc.id, 'data.json'), JSON.stringify(data), function (err){
-								if(err) return cb(err);
-								console.log('[%s] 创建 %s', utils.format(), 'data.json');
-								// TODO
-								editTaskInfo.call(self, doc, cb);
-							});
-						}
-					});
-
-					// 运行脚本
-					var script = vm.createScript(doc.ANALYSIS_SCRIPT);
-
-					script.runInContext(ctx);
-				})();
-			});
+				// 运行脚本
+				var script = vm.createScript(doc.ANALYSIS_SCRIPT);
+				script.runInContext(ctx);
+			})();
 		});
 	});
 }

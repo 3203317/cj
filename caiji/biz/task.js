@@ -67,13 +67,11 @@ function getScript(folder, id, cb){
 
 				getScript('analysis', doc.id, function (err, script){
 					if(err) return ep.emit('error', err);
-					// TODO
 					ep.emit('analysis', script);
 				});
 
 				getScript('resource', doc.id, function (err, script){
 					if(err) return ep.emit('error', err);
-					// TODO
 					ep.emit('resource', script);
 				});
 			})();
@@ -176,20 +174,4 @@ exports.getById = function(id, cb){
 			});
 		};
 	})(exports);
-})(exports);
-
-/**
- *
- * @params
- * @return
- */
-(function (exports){
-	var sql = 'UPDATE c_task set STARTUP=? WHERE STARTUP=?';
-	// TODO
-	exports.editByStartup = function(before, after, cb){
-		mysql.query(sql, [after, before], function (err, status){
-			if(err) return cb(err);
-			cb(null, status);
-		});
-	};
 })(exports);

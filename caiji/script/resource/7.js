@@ -21,7 +21,7 @@
 			DEPTH: 2,
 			URI: 'http://www.poxiao.com'+ a.attr('href')
 		});
-	}); // END
+	}); // FOR
 
 	// TODO
 	callback(null, data);

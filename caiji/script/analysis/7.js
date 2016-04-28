@@ -3,23 +3,19 @@
  * Copyright(c) 2015 caiji <3203317@qq.com>
  * MIT Licensed
  */
-var cheerio = require('cheerio');
-var Spooky = require('spooky');
+// var cheerio = require('cheerio');
+// var Spooky = require('spooky');
 
-var docs = [{
-	DEPTH: 2,
-	html: '<html><body></body></html>',
-	URI: 'http://www.poxiao.com/movie/41006.html'
-}, {
-	DEPTH: 2,
-	html: '<html><body></body></html>',
-	URI: 'http://www.poxiao.com/movie/40978.html'
-}];
+// var doc = {
+// 	DEPTH: 2,
+// 	html: '<html><body></body></html>',
+// 	URI: 'http://www.poxiao.com/movie/41006.html'
+// };
 
-function callback(err, data){
-	if(err) return console.log(err);
-	console.log(data);
-};
+// function callback(err){
+// 	if(err) return console.log(err);
+// 	console.log(doc);
+// }
 
 (function(){
 	function casperjs(uri, cb){
@@ -47,17 +43,19 @@ function callback(err, data){
 
 			spooky.then(function(){
 				// TODO
-				var newDoc = {};
+				var json = {};
+
+				try{
+					// TODO
+					json.TITLE = this.getTitle();
+					json.INTRO = this.getHTML('p.inner_content');
+					json.OTHER = this.evaluate(function(){
+						return __utils__.findOne('#button').getAttribute('value');
+					});	
+				}catch(e){}
 
 				// TODO
-				newDoc.TITLE = this.getTitle();
-				newDoc.INTRO = this.getHTML('p.inner_content');
-				newDoc.OTHER = this.evaluate(function(){
-					return __utils__.findOne('#button').getAttribute('value');
-				});
-
-				// TODO
-				this.emit('newDoc', newDoc);
+				this.emit('json', json);
 			});
 
 			spooky.run();
@@ -68,58 +66,42 @@ function callback(err, data){
 		// });
 
 		spooky.on('error', function (err, stack){
-			cb(err);
+			var e = new Error();
+			e.code = 'CasperError';
+			e.details = err;
+			cb(e);
 		});
 
-		spooky.on('newDoc', function (newDoc){
-			console.log('[%s] 获取数据 %s', (new Date().getTime()), newDoc.TITLE);
-			cb(null, newDoc);
+		spooky.on('json', function (json){
+			console.log('[%s] 获取数据 %s', (new Date().getTime()), json.TITLE);
+			cb(null, json);
+			this.exit();
 		});
 	}
 
 	function analysis(doc, cb){
 		// TODO
-		casperjs(doc.URI, function (err, newDoc){
+		casperjs(doc.URI, function (err, json){
 			if(err) return cb(err);
 
 			// TODO
 			var $ = cheerio.load(doc.html, { decodeEntities: false });
 			// 标题
-			newDoc.TITLE = $('#film').find('.detail_pic1').find('>img').attr('alt');
+			json.TITLE = $('#film').find('.detail_pic1').find('>img').attr('alt');
 			// 图片
-			newDoc.IMG = $('#film').find('.detail_pic1').find('>img').attr('src');
-			newDoc.RELEASE_DATE = true;
+			json.IMG = $('#film').find('.detail_pic1').find('>img').attr('src');
+			json.RELEASE_DATE = true;
 
-			cb(null, newDoc);
+			// TODO
+			doc.json = json;
+
+			cb(null);
 		});
 	}
 
-	(function(){
-		var data = [];
-		var i = 0;
-
-		function getDoc(){
-			return docs[i++];
-		}
-
-		function run(){
-			var doc = getDoc();
-			// TODO
-			if(!doc) return callback(null, data);
-
-			// TODO
-			if(2 !== doc.DEPTH) return run();
-			if(!doc.html) return run();
-
-			// TODO
-			analysis(doc, function (err, newDoc){
-				if(err) return callback(err);
-				// TODO
-				data.push(newDoc);
-				run();
-			});
-		}; // FUNC
-
-		run();
-	})();
+	// TODO
+	analysis(doc, function (err){
+		if(err) return callback(err);
+		callback(null);
+	});
 })();
