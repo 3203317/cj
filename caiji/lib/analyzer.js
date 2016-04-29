@@ -61,7 +61,7 @@ pro.start = function(){
 			case 'PROTOCOL_CONNECTION_LOST':
 			case 'CasperError':
 				self.state_running = false;
-				console.log('[%s] analyzer error: %s', utils.format(), err.code);
+				console.error('[%s] analyzer error: %s', utils.format(), err.code);
 				break;
 			default:
 				throw err;
@@ -83,13 +83,25 @@ function editResourceInfo(resource, cb){
 	});
 }
 
+function retry(resource, cb){
+	var self = this;
+	// TODO
+	resource.RETRY_COUNT++;
+	biz.resource.editInfo(resource, function (err, status){
+		if(err) return cb(err);
+		console.log('[%s] 重试+1 %s', utils.format(), resource.URI);
+		start.call(self, cb);
+	});
+}
+
 function writeFile(resource, cb){
 	var self = this;
 	// TODO
-	if(!resource.json) return editResourceInfo.call(self, resource, cb);
-
+	if(!resource.json) return retry.call(self, resource, cb);
 	// TODO
-	fs.writeFile(path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.json'), JSON.stringify(resource.json), function (err){
+	var filename = path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.json');
+	// TODO
+	fs.writeFile(filename, JSON.stringify(resource.json), function (err){
 		if(err) return cb(err);
 		console.log('[%s] 创建 %s', utils.format(), resource.id +'.json');
 		editResourceInfo.call(self, resource, cb);
@@ -111,7 +123,6 @@ function runScript(resource, cb){
 			writeFile.call(self, resource, cb);
 		}
 	});
-
 	// 运行脚本
 	var script = vm.createScript(resource.ANALYSIS_SCRIPT);
 	script.runInContext(ctx);
@@ -120,13 +131,15 @@ function runScript(resource, cb){
 function attachHtml(resource, cb){
 	var self = this;
 	// TODO
-	var newPath = path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.html');
+	var filename = path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.html');
 	// TODO
-	fs.exists(newPath, function (exists){
-		if(!exists) return runScript.call(self, resource, cb);
+	fs.exists(filename, function (exists){
+		if(!exists) return editResourceInfo.call(self, resource, cb);
 		// TODO
-		fs.readFile(newPath, 'utf-8', function (err, html){
+		fs.readFile(filename, 'utf-8', function (err, html){
 			if(err) return cb(err);
+			// TODO
+			if(!html) return editResourceInfo.call(self, resource, cb);
 			// TODO
 			resource.html = html;
 			runScript.call(self, resource, cb);
@@ -153,7 +166,7 @@ function getResource(task, cb){
 		if(err) return cb(err);
 		// TODO
 		if(!doc) return editTaskInfo.call(self, task, cb);
-
+		// TODO
 		attachHtml.call(self, doc, cb);
 	});
 }
@@ -168,10 +181,8 @@ function start(cb){
 	// 采集中
 	biz.task.getByStartup(2, function (err, doc){
 		if(err) return cb(err);
-
 		// 不存在则休眠
 		if(!doc) return sleep.call(self);
-
 		// 获取一条 resource
 		getResource.call(self, doc, cb);
 	});

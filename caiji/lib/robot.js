@@ -74,5 +74,5 @@ pro.stop = function(force){
 };
 
 var schedule_1 = { schedules: [{ s: [0] }] };
-var schedule_2 = { schedules: [{ s: [10] }] };
-var schedule_3 = { schedules: [{ s: [0, 15, 25, 35, 45, 55] }] };
+var schedule_2 = { schedules: [{ s: [5] }] };
+var schedule_3 = { schedules: [{ s: [15, 25, 35, 45, 55] }] };

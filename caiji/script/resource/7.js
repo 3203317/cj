@@ -5,7 +5,7 @@
  */
 (function(){
 	// TODO
-	if(2 === doc.DEPTH) return callback(null);
+	if(1 !== doc.DEPTH) return callback(null);
 
 	// TODO
 	var data = [];

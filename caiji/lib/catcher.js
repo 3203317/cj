@@ -61,7 +61,7 @@ pro.start = function(){
 			case 'PROTOCOL_CONNECTION_LOST':
 			case 'CasperError':
 				self.state_running = false;
-				console.log('[%s] catcher timeout: %s', utils.format(), err.code);
+				console.error('[%s] catcher timeout: %s', utils.format(), err.code);
 				break;
 			default:
 				throw err;
@@ -110,7 +110,6 @@ function runScript(resource, cb){
 			}); // END
 		}
 	});
-
 	// 运行脚本
 	var script = vm.createScript(resource.RESOURCE_SCRIPT);
 	script.runInContext(ctx);
@@ -119,7 +118,9 @@ function runScript(resource, cb){
 function writeFile(resource, cb){
 	var self = this;
 	// TODO
-	fs.writeFile(path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.html'), resource.html, function (err){
+	var filename = path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.html');
+	// TODO
+	fs.writeFile(filename, resource.html, function (err){
 		if(err) return cb(err);
 		console.log('[%s] 创建 %s', utils.format(), resource.id +'.html');
 		runScript.call(self, resource, cb);
@@ -155,7 +156,6 @@ function getResource(task, cb){
 		if(err) return cb(err);
 		// TODO
 		if(!doc) return editTaskInfo.call(self, task, cb);
-
 		// TODO
 		sendReq(doc.URI, doc.CHARSET, function (err, html){
 			if(err || !html) return retry.call(self, doc, cb);
@@ -177,10 +177,8 @@ function start(cb){
 	// 采集中
 	biz.task.getByStartup(1, function (err, doc){
 		if(err) return cb(err);
-
 		// 不存在则休眠
 		if(!doc) return sleep.call(self);
-
 		// 获取一条 resource
 		getResource.call(self, doc, cb);
 	});

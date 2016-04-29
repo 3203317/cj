@@ -51,8 +51,8 @@
 					json.INTRO = this.getHTML('p.inner_content');
 					json.OTHER = this.evaluate(function(){
 						return __utils__.findOne('#button').getAttribute('value');
-					});	
-				}catch(e){}
+					});
+				}catch(e){ console.error(e); }
 
 				// TODO
 				this.emit('json', json);

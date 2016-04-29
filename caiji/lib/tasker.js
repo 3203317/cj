@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var EventProxy = require('eventproxy');
+
 var exec = require('child_process').exec;
 
 var fs = require('fs');
@@ -59,7 +61,7 @@ pro.start = function(){
 			case 'PROTOCOL_SEQUENCE_TIMEOUT':
 			case 'PROTOCOL_CONNECTION_LOST':
 				self.state_running = false;
-				console.log('[%s] tasker timeout: %s', utils.format(), err.code);
+				console.error('[%s] tasker timeout: %s', utils.format(), err.code);
 				break;
 			default:
 				throw err;
@@ -110,18 +112,32 @@ function removeResourceByTaskId(task, cb){
 	});
 }
 
-function deleteHtmls(task, cb){
+function deleteFiles(task, cb){
 	var self = this;
 	// TODO
+	var ep = EventProxy.create('html', 'json', function(){
+		removeResourceByTaskId.call(self, task, cb);
+	});
+
+	ep.fail(function (err){
+		cb(err);
+	});
+
 	var id = task.id;
 	var newFolder = path.join(conf.robot.storagePath, id);
 
 	// 执行windows命令
 	exec('del /F /S /Q *.html', { cwd: newFolder }, function (err){
-		if(err) return cb(err);
+		if(err) return ep.emit('error', err);
 		console.log('[%s] 删除文件 *.html %s', utils.format(), id);
-		// TODO
-		removeResourceByTaskId.call(self, task, cb);
+		ep.emit('html');
+	});
+
+	// 执行windows命令
+	exec('del /F /S /Q *.json', { cwd: newFolder }, function (err){
+		if(err) return ep.emit('error', err);
+		console.log('[%s] 删除文件 *.json %s', utils.format(), id);
+		ep.emit('json');
 	});
 }
 
@@ -135,11 +151,9 @@ function start(cb){
 	// 停止中
 	biz.task.getByStartup(0, function (err, doc){
 		if(err) return cb(err);
-
 		// 不存在则休眠
 		if(!doc) return sleep.call(self);
-
 		// 删除文件夹下的所有 html 文件
-		deleteHtmls.call(self, doc, cb);
+		deleteFiles.call(self, doc, cb);
 	});
 }
