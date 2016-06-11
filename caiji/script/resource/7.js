@@ -4,10 +4,9 @@
  * MIT Licensed
  */
 (function(){
-	// TODO
+	// 深度判断
 	if(1 !== doc.DEPTH) return callback(null);
 
-	// TODO
 	var data = [];
 	var $ = cheerio.load(doc.html, { decodeEntities: false });
 
@@ -15,14 +14,16 @@
 		var that = $(this);
 		var a = that.find('>a');
 
-		// TODO
+		// 组装数据
 		data.push({
+			PID: doc.id,
 			TITLE: a.text(),
-			DEPTH: 2,
+			DEPTH: 1 + doc.DEPTH,
+			SORT: 1 + i,
 			URI: 'http://www.poxiao.com'+ a.attr('href')
 		});
-	}); // FOR
+	});
 
-	// TODO
+	// 回调
 	callback(null, data);
-})(); // END
+})();

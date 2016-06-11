@@ -25,6 +25,7 @@ var iconv = require('iconv-lite');
 var conf = require('../settings');
 
 var sendReq = require('./sendReq');
+var getScript = require('./getScript');
 
 var biz = {
 	resource: require('../biz/resource'),
@@ -85,11 +86,12 @@ function editResourceInfo(resource, cb){
 
 function retry(resource, cb){
 	var self = this;
-	// TODO
+
+	// 重试次数+1
 	resource.RETRY_COUNT++;
 	biz.resource.editInfo(resource, function (err, status){
 		if(err) return cb(err);
-		console.log('[%s] 重试+1 %s', utils.format(), resource.URI);
+		console.log('[%s] 重试次数+1 %s', utils.format(), resource.URI);
 		start.call(self, cb);
 	});
 }
@@ -110,7 +112,8 @@ function writeFile(resource, cb){
 
 function runScript(resource, cb){
 	var self = this;
-	// TODO
+
+	// 沙箱
 	var ctx = vm.createContext({
 		cheerio: cheerio,
 		console: console,
@@ -138,11 +141,19 @@ function attachHtml(resource, cb){
 		// TODO
 		fs.readFile(filename, 'utf-8', function (err, html){
 			if(err) return cb(err);
-			// TODO
+
+			// 判断 html 是否存在
 			if(!html) return editResourceInfo.call(self, resource, cb);
-			// TODO
-			resource.html = html;
-			runScript.call(self, resource, cb);
+
+			// 获取脚本
+			getScript('analysis', resource.TASK_ID, function (err, script){
+				if(err) return cb(err);
+
+				// 脚本
+				resource.ANALYSIS_SCRIPT = script;
+				resource.html = html;
+				runScript.call(self, resource, cb);
+			});
 		});
 	});
 }

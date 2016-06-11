@@ -20,61 +20,21 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(folder, id, cb){
-	var newPath = path.join(process.cwd(), 'script', folder, id +'.js');
-	// TODO
-	fs.exists(newPath, function (exists){
-		if(!exists) return cb(null);
-		// TODO
-		fs.readFile(newPath, 'utf-8', function (err, script){
-			if(err) return cb(err);
-			// TODO
-			cb(null, script);
-		});
-	});
-}
-
 (function (exports){
 	var sql = 'SELECT b.TASK_NAME, a.*'+
 				' FROM (SELECT * FROM c_resource WHERE FINISHED=? AND TASK_ID=?) a LEFT JOIN c_task b ON (a.TASK_ID=b.id)'+
 				' WHERE b.id IS NOT NULL AND a.RETRY_COUNT<b.RETRY_COUNT ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
-	 * @params
+	 * @param finished 0
+	 * @param task_id 任务id
 	 * @return
 	 */
 	exports.getByFinished = function(finished, task_id, cb){
-		// TODO
+		// 执行 sql
 		mysql.query(sql, [finished, task_id], function (err, docs){
 			if(err) return cb(err);
-			// TODO
-			if(!mysql.checkOnly(docs)) return cb(null);
-
-			(function(){
-				var doc = docs[0];
-
-				// TODO
-				var ep = EventProxy.create('analysis', 'resource', function (analysis, resource){
-					// TODO
-					doc.ANALYSIS_SCRIPT = analysis;
-					doc.RESOURCE_SCRIPT = resource;
-					cb(null, doc);
-				});
-
-				ep.fail(function (err){
-					cb(err);
-				});
-
-				getScript('analysis', doc.TASK_ID, function (err, script){
-					if(err) return ep.emit('error', err);
-					ep.emit('analysis', script);
-				});
-
-				getScript('resource', doc.TASK_ID, function (err, script){
-					if(err) return ep.emit('error', err);
-					ep.emit('resource', script);
-				});
-			})();
+			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
 	};
 })(exports);
@@ -123,12 +83,14 @@ exports.getByTaskId = function(task_id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_resource (id, URI, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+		var sql = 'INSERT INTO c_resource (id, PID, URI, SORT, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		// TODO
 		function saveNew(conn, newInfo, cb){
 			var postData = [
 				util.replaceAll(uuid.v1(), '-', ''),
+				newInfo.PID,
 				newInfo.URI,
+				newInfo.SORT,
 				newInfo.CHARSET,
 				newInfo.TITLE,
 				0,
@@ -152,13 +114,15 @@ exports.getByTaskId = function(task_id, cb){
 
 			if(!newInfos || 0 === newInfos.length) return cb(null);
 
-			// TODO
+			// 池
 			mysql.getPool(function (err, conn){
 				if(err) return cb(err);
-				// TODO
+
+				// 事务
 				conn.beginTransaction(function (err){
 					if(err) return cb(err);
-					// TODO
+
+					// 闭包
 					(function(){
 						var i = 0;
 
@@ -168,13 +132,15 @@ exports.getByTaskId = function(task_id, cb){
 
 						function run(){
 							var newInfo = getNewInfo();
+
 							if(!newInfo){
 								return conn.commit(function (err){
 									if(err){
 										return conn.rollback(function(){
 											cb(err);
 										});
-									} // END
+									}
+
 									cb(null);
 								});
 							}
@@ -184,10 +150,12 @@ exports.getByTaskId = function(task_id, cb){
 									return conn.rollback(function(){
 										cb(err);
 									});
-								} // END
+								}
+
 								run();
 							});
-						} // END
+						}
+
 						run();
 					})();
 				});
@@ -231,7 +199,8 @@ exports.getByTaskId = function(task_id, cb){
  */
 (function (exports){
 	var sql = 'DELETE FROM c_resource WHERE TASK_ID=?';
-	// TODO
+
+	// 删除资源 by 任务 id
 	exports.removeByTaskId = function(task_id, cb){
 		mysql.query(sql, [task_id], function (err, status){
 			if(err) return cb(err);

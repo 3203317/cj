@@ -53,7 +53,8 @@ pro.start = function(){
 	if(self.state_running) return;
 	self.state_running = true;
 	console.log('[%s] tasker running', utils.format());
-	// TODO
+
+	// 调用启动方法
 	start.call(self, function (err){
 		switch(err.code){
 			case 'ECONNREFUSED':
@@ -73,49 +74,57 @@ pro.stop = function(force){
 	// TODO
 };
 
-function editTaskInfo(task, cb){
+function createNewResourcePortal(task, cb){
 	var self = this;
-	// 采集中
-	task.STARTUP = 1;
-	biz.task.editInfo(task, function (err, status){
-		if(err) return cb(err);
-		// TODO
-		start.call(self, cb);
-	});
-}
 
-function createNewResource(task, cb){
-	var self = this;
-	// TODO
+	// 新对象
 	var newInfo = {
 		URI: task.PORTAL_URI,
 		CHARSET: task.CHARSET,
 		TASK_ID: task.id,
+		SORT: 1,
+		PID: 0,
 		DEPTH: 1
 	};
 
-	// TODO
+	// 新增入口资源
 	biz.resource.saveNew(newInfo, function (err, status){
 		if(err) return cb(err);
-		// TODO
-		editTaskInfo.call(self, task, cb);
+		// 重新启动 start
+		start.call(self, cb);
+	});
+}
+
+function editTaskInfo(task, cb){
+	var self = this;
+	// 标记变更为 采集中
+	task.STARTUP = 1;
+
+	// 编辑任务状态
+	biz.task.editInfo(task, function (err, status){
+		if(err) return cb(err);
+		// 新增入口资源
+		createNewResourcePortal.call(self, task, cb);
 	});
 }
 
 function removeResourceByTaskId(task, cb){
 	var self = this;
-	// TODO
+
+	// 删除与任务相关的资源
 	biz.resource.removeByTaskId(task.id, function (err, status){
 		if(err) return cb(err);
-		// TODO
-		createNewResource.call(self, task, cb);
+		// 编辑任务状态为 1 采集中
+		editTaskInfo.call(self, task, cb);
 	});
 }
 
 function deleteFiles(task, cb){
 	var self = this;
-	// TODO
+
+	// 异步
 	var ep = EventProxy.create('html', 'json', function(){
+		// 删除与任务相关的资源
 		removeResourceByTaskId.call(self, task, cb);
 	});
 
@@ -123,20 +132,19 @@ function deleteFiles(task, cb){
 		cb(err);
 	});
 
-	var id = task.id;
-	var newFolder = path.join(conf.robot.storagePath, id);
+	var newFolder = path.join(conf.robot.storagePath, task.id);
 
 	// 执行windows命令
 	exec('del /F /S /Q *.html', { cwd: newFolder }, function (err){
 		if(err) return ep.emit('error', err);
-		console.log('[%s] 删除文件 *.html %s', utils.format(), id);
+		console.log('[%s] 删除文件 *.html %s', utils.format(), task.id);
 		ep.emit('html');
 	});
 
 	// 执行windows命令
 	exec('del /F /S /Q *.json', { cwd: newFolder }, function (err){
 		if(err) return ep.emit('error', err);
-		console.log('[%s] 删除文件 *.json %s', utils.format(), id);
+		console.log('[%s] 删除文件 *.json %s', utils.format(), task.id);
 		ep.emit('json');
 	});
 }
@@ -148,10 +156,10 @@ function sleep(){
 
 function start(cb){
 	var self = this;
-	// 停止中
+	// 获取停止中的任务
 	biz.task.getByStartup(0, function (err, doc){
 		if(err) return cb(err);
-		// 不存在则休眠
+		// 不存在则任务组件休眠
 		if(!doc) return sleep.call(self);
 		// 删除文件夹下的所有 html 文件
 		deleteFiles.call(self, doc, cb);

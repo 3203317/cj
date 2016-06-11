@@ -24,9 +24,9 @@ var Component = function(opts){
 	var self = this;
 	opts = opts || {};
 	self.opts = opts;
-	// TODO
+	// 本地时间
 	later.date.localTime();
-	// TODO
+	// 初始化状态为停止
 	self.state = STATE_STOPED;
 };
 
@@ -36,43 +36,44 @@ pro.name = '__robot__';
 
 pro.start = function(cb){
 	var self = this;
-	// TODO
+	// 如果已经启动则返回
 	if(STATE_START === self.state) return;
+	// 设置状态为启动
 	self.state = STATE_START;
 
-	// TODO
+	// 任务组件
 	if(!self.tasker) self.tasker = new Tasker(self.opts);
 	self.time_1 = later.setInterval(function(){
 		self.tasker.start();
 	}, schedule_1);
 
-	// TODO
+	// 捕获器组件
 	if(!self.catcher) self.catcher = new Catcher(self.opts);
 	self.time_2 = later.setInterval(function(){
 		self.catcher.start();
 	}, schedule_2);
 
-	// TODO
+	// 分析器组件
 	if(!self.analyzer) self.analyzer = new Analyzer(self.opts);
 	self.time_3 = later.setInterval(function(){
 		self.analyzer.start();
 	}, schedule_3);
 
-	// TODO
 	process.nextTick(cb);
 };
 
 pro.stop = function(force){
 	var self = this;
-	// TODO
+	// 如果已经停止则返回
 	if(STATE_STOPED === self.state) return;
 	self.state = STATE_STOPED;
-	// TODO
+
+	// 停止后清理
 	if(self.time_1) self.time_1.clear();
 	if(self.time_2) self.time_2.clear();
 	if(self.time_3) self.time_3.clear();
 };
 
-var schedule_1 = { schedules: [{ s: [0] }] };
+var schedule_1 = { schedules: [{ s: [0, 10 ,15, 25, 35, 45, 55] }] };
 var schedule_2 = { schedules: [{ s: [5] }] };
 var schedule_3 = { schedules: [{ s: [15, 25, 35, 45, 55] }] };

@@ -25,6 +25,7 @@ var iconv = require('iconv-lite');
 var conf = require('../settings');
 
 var sendReq = require('./sendReq');
+var getScript = require('./getScript');
 
 var biz = {
 	task: require('../biz/task'),
@@ -52,7 +53,7 @@ pro.start = function(){
 	if(self.state_running) return;
 	self.state_running = true;
 	console.log('[%s] catcher running', utils.format());
-	// TODO
+
 	start.call(self, function (err){
 		switch(err.code){
 			case 'ECONNREFUSED':
@@ -75,8 +76,11 @@ pro.stop = function(force){
 
 function editResourceInfo(resource, cb){
 	var self = this;
-	// TODO
+
+	// html 资源采集完成
 	resource.FINISHED = 1;
+
+	// 执行 sql
 	biz.resource.editInfo(resource, function (err, status){
 		if(err) return cb(err);
 		start.call(self, cb);
@@ -85,7 +89,8 @@ function editResourceInfo(resource, cb){
 
 function runScript(resource, cb){
 	var self = this;
-	// TODO
+
+	// 沙箱
 	var ctx = vm.createContext({
 		cheerio: cheerio,
 		console: console,
@@ -95,21 +100,24 @@ function runScript(resource, cb){
 		callback: function(err, data){
 			if(err) return cb(err);
 
-			// TODO
+			// 判断沙箱中返回的数据是否为空
 			if(!data) return editResourceInfo.call(self, resource, cb);
 
+			// 待采集的 URI 赋予字符集与任务id
 			for(var i in data){
 				var elem = data[i];
 				elem.CHARSET = resource.CHARSET;
 				elem.TASK_ID = resource.TASK_ID;
-			} // FOR
+			}
 
+			// 批量保存待采集的 URI
 			biz.resource.batchSaveNew(data, function (err){
 				if(err) return cb(err);
 				editResourceInfo.call(self, resource, cb);
-			}); // END
+			});
 		}
 	});
+
 	// 运行脚本
 	var script = vm.createScript(resource.RESOURCE_SCRIPT);
 	script.runInContext(ctx);
@@ -117,20 +125,33 @@ function runScript(resource, cb){
 
 function writeFile(resource, cb){
 	var self = this;
-	// TODO
+
+	// 待创建的文件名
 	var filename = path.join(conf.robot.storagePath, resource.TASK_ID, resource.id +'.html');
-	// TODO
+
+	// 写入文件
 	fs.writeFile(filename, resource.html, function (err){
 		if(err) return cb(err);
 		console.log('[%s] 创建 %s', utils.format(), resource.id +'.html');
-		runScript.call(self, resource, cb);
+
+		// 获取脚本
+		getScript('resource', resource.TASK_ID, function (err, script){
+			if(err) return cb(err);
+
+			// 脚本
+			resource.RESOURCE_SCRIPT = script;
+			runScript.call(self, resource, cb);
+		});
 	});
 }
 
 function retry(resource, cb){
 	var self = this;
-	// TODO
+
+	// 重试次数 +1
 	resource.RETRY_COUNT++;
+
+	// 编辑此条资源的重试次数
 	biz.resource.editInfo(resource, function (err, status){
 		if(err) return cb(err);
 		console.log('[%s] 重试+1 %s', utils.format(), resource.URI);
@@ -140,27 +161,33 @@ function retry(resource, cb){
 
 function editTaskInfo(task, cb){
 	var self = this;
-	// TODO
+
+	// 任务状态变更为采集完毕
 	task.STARTUP = 2;
+
+	// 执行 sql
 	biz.task.editInfo(task, function (err, status){
 		if(err) return cb(err);
-		// TODO
 		start.call(self);
 	});
 }
 
 function getResource(task, cb){
 	var self = this;
-	// TODO
+
+	// 获取一条未采集的资源数据
 	biz.resource.getByFinished(0, task.id, function (err, doc){
 		if(err) return cb(err);
-		// TODO
+
+		// 没有找到则编辑任务状态为采集完毕
 		if(!doc) return editTaskInfo.call(self, task, cb);
-		// TODO
+
+		// 发送请求获取远程路径的 html 代码
 		sendReq(doc.URI, doc.CHARSET, function (err, html){
+			// 错误或没有获取 html 则重试
 			if(err || !html) return retry.call(self, doc, cb);
 
-			// TODO
+			// html 写入文件
 			doc.html = html;
 			writeFile.call(self, doc, cb);
 		});

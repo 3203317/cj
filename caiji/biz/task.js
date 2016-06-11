@@ -20,61 +20,20 @@ var conf = require('../settings');
 
 var exports = module.exports;
 
-function getScript(folder, id, cb){
-	var newPath = path.join(process.cwd(), 'script', folder, id +'.js');
-	// TODO
-	fs.exists(newPath, function (exists){
-		if(!exists) return cb(null);
-		// TODO
-		fs.readFile(newPath, 'utf-8', function (err, script){
-			if(err) return cb(err);
-			// TODO
-			cb(null, script);
-		});
-	});
-}
-
 (function (exports){
-	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	// 获取调度次数 > 0 的最早的 1 条记录
+	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>0 AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
-	 * STARTUP 0停止 1采集ing 2分析ing
+	 * startup 0停止 1采集ing 2分析ing
 	 *
-	 * @params
+	 * @param startup 启动状态
 	 * @return
 	 */
 	exports.getByStartup = function(startup, cb){
-		startup = startup || 0;
-		// TODO
-		mysql.query(sql, [0, startup], function (err, docs){
+		// 执行 sql 查询
+		mysql.query(sql, [startup || 0], function (err, docs){
 			if(err) return cb(err);
-			// TODO
-			if(!mysql.checkOnly(docs)) return cb(null);
-
-			(function(){
-				var doc = docs[0];
-
-				// TODO
-				var ep = EventProxy.create('analysis', 'resource', function (analysis, resource){
-					// TODO
-					doc.ANALYSIS_SCRIPT = analysis;
-					doc.RESOURCE_SCRIPT = resource;
-					cb(null, doc);
-				});
-
-				ep.fail(function (err){
-					cb(err);
-				});
-
-				getScript('analysis', doc.id, function (err, script){
-					if(err) return ep.emit('error', err);
-					ep.emit('analysis', script);
-				});
-
-				getScript('resource', doc.id, function (err, script){
-					if(err) return ep.emit('error', err);
-					ep.emit('resource', script);
-				});
-			})();
+			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
 	};
 })(exports);
