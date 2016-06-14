@@ -16,6 +16,10 @@ var api = {
 	index: require('../controllers/api/index')
 };
 
+var portal = {
+	index: require('../controllers/portal/index')
+};
+
 function proc_api(app){
 	var index = api.index;
 
@@ -30,6 +34,12 @@ function proc_manage(app){
 	app.get('/manage/user/login$', user.loginUI);
 }
 
+function proc_portal(app){
+	var index = portal.index;
+
+	app.get('/', index.indexUI);
+}
+
 /**
  *
  * @param
@@ -38,4 +48,5 @@ function proc_manage(app){
 module.exports = function(app){
 	proc_manage(app);
 	proc_api(app);
+	proc_portal(app);
 };

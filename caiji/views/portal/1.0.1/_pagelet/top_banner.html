@@ -1,0 +1,56 @@
+<div id='banner' class='navbar navbar-inverse navbar-fixed-top' role='banner'>
+	<div class='container'>
+		<div class='navbar-header'>
+			<button class='navbar-toggle' data-target='#navbar-collapse' data-toggle='collapse' type='button'>
+				<span class='sr-only'>Toggle navigation</span>
+				<span class='icon-bar'></span>
+				<span class='icon-bar'></span>
+				<span class='icon-bar'></span>
+			</button>
+			<a class='navbar-brand' href='/'>DAZAHUI 大杂烩</a>
+		</div>
+		<div id='navbar-collapse' class='collapse navbar-collapse'>
+			<ul class='nav navbar-nav'>
+				<li$!{indexActiveClass}><a href='/index.html'>首页</a></li>
+				<li class='dropdown'>
+					<a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>电影 <b class='caret'></b></a>
+					<ul class='dropdown-menu'>
+						<li><a href='/archive/category/杂文/'>动作</a></li>
+						<li><a href='/archive/category/设计模式/'>喜剧</a></li>
+						<li><a href='/archive/category/插件/'>爱情</a></li>
+						<li><a href='/archive/category/ASP.NET/'>科幻</a></li>
+						<li><a href='/archive/category/Java/'>剧情</a></li>
+						<li><a href='/archive/category/Golang/'>悬疑</a></li>
+					</ul>
+				</li>
+				<li class='dropdown'>
+					<a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>电视剧 <b class='caret'></b></a>
+					<ul class='dropdown-menu'>
+						<li><a href='/archive/category/杂文/'>内地</a></li>
+						<li><a href='/archive/category/设计模式/'>港台</a></li>
+						<li><a href='/archive/category/插件/'>欧美</a></li>
+						<li><a href='/archive/category/ASP.NET/'>日韩</a></li>
+					</ul>
+				</li>
+				<li><a href='javascript:;'>动漫</a></li>
+				<li><a href='javascript:;'>游戏</a></li>
+				<li><a href='javascript:;'>综艺</a></li>
+				<li class='active'><a href='/archive/'>今日更新</a></li>
+			</ul>
+			<ul class='nav navbar-nav navbar-right'>
+				<li class='active'>#if($!{loginState})
+					<a href='/user/logout'>退出</a>
+					#else
+					<a href='/user/login'>登陆</a>
+					#end
+				</li>
+			</ul>
+			<form id='frm_search' class='navbar-form navbar-right' role='search' data-olx-type='olx.form' onsubmit='return false;'>
+				<div class='form-group'><input class='form-control' type='text' placeholder='搜索'></div>
+				<button class='btn btn-default' type='submit'>
+					<div class='glyphicon glyphicon-search'></div>
+				</button>
+			</form>
+		</div>
+	</div>
+</div>
