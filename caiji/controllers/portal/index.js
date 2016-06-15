@@ -32,13 +32,18 @@ exports.indexUI = function(req, res, next){
  */
 exports.newUI = function(req, res, next){
 
-	var ep = EventProxy.create('movies', function (movies){
+	var ep = EventProxy.create('movie', 'tv_neidi', 'tv_oumei', 'tv_gangtai', 'tv_rihan',
+						function (movie, tv_neidi, tv_oumei, tv_gangtai, tv_rihan){
 		res.render('portal/1.0.1/index', {
 			conf: conf,
 			description: '',
 			keywords: ',html5,nodejs',
 			data: {
-				movies: movies
+				movie: movie,
+				tv_neidi: tv_neidi,
+				tv_oumei: tv_oumei,
+				tv_gangtai: tv_gangtai,
+				tv_rihan: tv_rihan
 			}
 		});
 	});
@@ -50,14 +55,34 @@ exports.newUI = function(req, res, next){
 	biz.movie.findNew('dianying', function (err, docs){
 		if(err) return ep.emit('error', err);
 
-		var movies = { docs: docs, types: [] };
+		var movie = { docs: docs, types: [] };
 
 		for(var i in docs){
-			if(-1 === movies.types.indexOf((docs[i]).TYPE_NAME)){
-				movies.types.push((docs[i]).TYPE_NAME);
+			if(-1 === movie.types.indexOf((docs[i]).TYPE_NAME)){
+				movie.types.push((docs[i]).TYPE_NAME);
 			}
 		}
 
-		ep.emit('movies', movies);
+		ep.emit('movie', movie);
+	});
+
+	biz.movie.findNewTv('neidi', function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('tv_neidi', docs);
+	});
+
+	biz.movie.findNewTv('oumei', function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('tv_oumei', docs);
+	});
+
+	biz.movie.findNewTv('gangtai', function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('tv_gangtai', docs);
+	});
+
+	biz.movie.findNewTv('rihan', function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('tv_rihan', docs);
 	});
 };

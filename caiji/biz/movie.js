@@ -39,6 +39,24 @@ var exports = module.exports;
 })(exports);
 
 (function (exports){
+	var sql = 'SELECT b.TYPE_NAME, a.*'+
+				' FROM (SELECT * FROM d_movie WHERE TYPE_ID="dianshiju" AND ZONE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10) a LEFT JOIN d_movie_material b ON (a.MATERIAL_ID=b.id)'+
+				' WHERE b.id IS NOT NULL';
+	/**
+	 * 电视剧
+	 *
+	 * @param
+	 * @return
+	 */
+	exports.findNewTv = function(zone_id, cb){
+		mysql.query(sql, [zone_id], function (err, docs){
+			if(err) return cb(err);
+			cb(null, docs);
+		});
+	};
+})(exports);
+
+(function (exports){
 	// 获取调度次数 > 0 的最早的 1 条记录
 	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>0 AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**

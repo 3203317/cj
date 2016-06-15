@@ -3,29 +3,65 @@
 	<div class='panel panel-default'>
 		<div class='panel-heading'>
 			<h4 class='panel-title'>
-				<a href='#tv_nd' data-parent='#accordion' data-toggle='collapse'>内地 ($!{data.movies.docs.length}部)</a>
+				<a href='#tv_neidi' data-parent='#accordion' data-toggle='collapse'>内地 ($!{data.tv_neidi.length}部)</a>
 			</h4>
+		</div>
+		<div id='tv_neidi' class='panel-collapse collapse in'>
+			<div class='panel-body'>
+				#foreach($doc in $!{data.tv_neidi})<p>
+					<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
+					<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
+					<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
+				</p>#end
+			</div>
 		</div>
 	</div><!-- end -->
 	<div class='panel panel-default'>
 		<div class='panel-heading'>
 			<h4 class='panel-title'>
-				<a href='#tv_gt' data-parent='#accordion' data-toggle='collapse'>港台 ($!{data.movies.docs.length}部)</a>
+				<a href='#tv_gangtai' data-parent='#accordion' data-toggle='collapse'>港台 ($!{data.tv_gangtai.length}部)</a>
 			</h4>
+		</div>
+		<div id='tv_gangtai' class='panel-collapse collapse in'>
+			<div class='panel-body'>
+				#foreach($doc in $!{data.tv_gangtai})<p>
+					<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
+					<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
+					<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
+				</p>#end
+			</div>
 		</div>
 	</div><!-- end -->
 	<div class='panel panel-default'>
 		<div class='panel-heading'>
 			<h4 class='panel-title'>
-				<a href='#tv_om' data-parent='#accordion' data-toggle='collapse'>欧美 ($!{data.movies.docs.length}部)</a>
+				<a href='#tv_oumei' data-parent='#accordion' data-toggle='collapse'>欧美 ($!{data.tv_oumei.length}部)</a>
 			</h4>
+		</div>
+		<div id='tv_oumei' class='panel-collapse collapse in'>
+			<div class='panel-body'>
+				#foreach($doc in $!{data.tv_oumei})<p>
+					<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
+					<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
+					<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
+				</p>#end
+			</div>
 		</div>
 	</div><!-- end -->
 	<div class='panel panel-default'>
 		<div class='panel-heading'>
 			<h4 class='panel-title'>
-				<a href='#tv_rh' data-parent='#accordion' data-toggle='collapse'>日韩 ($!{data.movies.docs.length}部)</a>
+				<a href='#tv_rihan' data-parent='#accordion' data-toggle='collapse'>日韩 ($!{data.tv_rihan.length}部)</a>
 			</h4>
+		</div>
+		<div id='tv_rihan' class='panel-collapse collapse in'>
+			<div class='panel-body'>
+				#foreach($doc in $!{data.tv_rihan})<p>
+					<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
+					<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
+					<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
+				</p>#end
+			</div>
 		</div>
 	</div><!-- end -->
 </div>
