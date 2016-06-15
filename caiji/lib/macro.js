@@ -25,5 +25,7 @@ module.exports = {
 		return !time ? '' : util.format(time, 'YY-MM-dd hh:mm:ss');
 	}, isNull: function(val){
 		return val || '';
+	}, numToMoney: function(n){
+		return util.currencyformat(n);
 	}
 };

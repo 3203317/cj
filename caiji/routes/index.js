@@ -38,6 +38,7 @@ function proc_portal(app){
 	var index = portal.index;
 
 	app.get('/', index.indexUI);
+	app.get('/new/', index.newUI);
 }
 
 /**
