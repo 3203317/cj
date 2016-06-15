@@ -21,7 +21,10 @@
 							</li>
 							<li class='active'><a href='/new/'>最近更新</a></li>
 						</ol>
-						#parse('portal/1.0.1/_pagelet/new_movie.html')
+						<div id='archives'>
+							#parse('portal/1.0.1/_pagelet/new_movie.html')
+							#parse('portal/1.0.1/_pagelet/new_tv.html')
+						</div>
 						<div>
 							<a href='javascript:;'>
 								<img src='/public/assets/images/share/16x16/twitter.png'></a>

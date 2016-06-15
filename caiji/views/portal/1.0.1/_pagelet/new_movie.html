@@ -1,20 +1,18 @@
-<div id='archives'>
-	<h3>电影</h3>
-	<div class='panel-group'>
-		<div class='panel panel-default'>
-			<div class='panel-heading'>
-				<h4 class='panel-title'>
-					<a href='#movie' data-parent='#accordion' data-toggle='collapse'>#foreach($doc in $!{data.movies.types})$!{doc} #end ($!{data.movies.docs.length}部)</a>
-				</h4>
-			</div>
-			<div id='movie' class='panel-collapse collapse in'>
-				<div class='panel-body'>
-					#foreach($doc in $!{data.movies.docs})<p>
-						<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
-						<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
-						<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
-					</p>#end
-				</div>
+<h3>电影</h3>
+<div class='panel-group'>
+	<div class='panel panel-default'>
+		<div class='panel-heading'>
+			<h4 class='panel-title'>
+				<a href='#movie' data-parent='#accordion' data-toggle='collapse'>#foreach($doc in $!{data.movies.types})$!{doc} #end ($!{data.movies.docs.length}部)</a>
+			</h4>
+		</div>
+		<div id='movie' class='panel-collapse collapse in'>
+			<div class='panel-body'>
+				#foreach($doc in $!{data.movies.docs})<p>
+					<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
+					<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
+					<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
+				</p>#end
 			</div>
 		</div>
 	</div>

@@ -22,7 +22,7 @@ var exports = module.exports;
 
 (function (exports){
 	var sql = 'SELECT b.TYPE_NAME, a.*'+
-				' FROM (SELECT * FROM d_movie ORDER BY CREATE_TIME DESC LIMIT 10) a LEFT JOIN d_movie_type b ON (a.TYPE_ID=b.id)'+
+				' FROM (SELECT * FROM d_movie WHERE TYPE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10) a LEFT JOIN d_movie_material b ON (a.MATERIAL_ID=b.id)'+
 				' WHERE b.id IS NOT NULL';
 	/**
 	 * 获取最近更新的电影
@@ -30,9 +30,8 @@ var exports = module.exports;
 	 * @param
 	 * @return
 	 */
-	exports.findNew = function(cb){
-		// 执行 sql 查询
-		mysql.query(sql, [], function (err, docs){
+	exports.findNew = function(type_id, cb){
+		mysql.query(sql, [type_id], function (err, docs){
 			if(err) return cb(err);
 			cb(null, docs);
 		});

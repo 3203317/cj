@@ -47,7 +47,7 @@ exports.newUI = function(req, res, next){
 		cb(err);
 	});
 
-	biz.movie.findNew(function (err, docs){
+	biz.movie.findNew('dianying', function (err, docs){
 		if(err) return ep.emit('error', err);
 
 		var movies = { docs: docs, types: [] };
