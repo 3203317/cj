@@ -1,0 +1,23 @@
+#parse('_pagelet/constant.html')
+<!DOCTYPE html>
+<html>
+<head>
+#parse('_pagelet/header.html')
+<title>${params.name} | 电影 | 大杂烩</title>
+</head>
+<body>
+	#parse('portal/1.0.1/_pagelet/top_banner.html')
+	<header id='header'></header>
+	<section class='container'>
+		<div class='row'>
+			<div class='col-sm-12 col-md-3'>
+				#parse('portal/1.0.1/_pagelet/panel_type.html')
+			</div>
+			<div class='col-sm-12 col-md-9'>
+			</div>
+		</div>
+	</section>
+	#parse('portal/1.0.1/_pagelet/footer.html')
+	#parse('_pagelet/js.html')
+</body>
+</html>

@@ -30,14 +30,51 @@ exports.indexUI = function(req, res, next){
  * @params
  * @return
  */
+exports.materialUI = function(req, res, next){
+
+	var ep = EventProxy.create('zone', function (zone){
+		res.render('portal/1.0.1/material', {
+			conf: conf,
+			description: '',
+			keywords: ',html5,nodejs',
+			nav: 'movie',
+			params: {
+				name: req.params.name
+			},
+			data: {
+				zone: zone
+			}
+		});
+	});
+
+	ep.fail(function (err, msg){
+		cb(err);
+	});
+
+	(function(){
+		ep.emit('zone', [{
+			'neidi': '内地',
+			'gangtai': '港台',
+			'oumei': '欧美',
+			'rihan': '日韩'
+		}]);
+	})();
+};
+
+/**
+ *
+ * @params
+ * @return
+ */
 exports.newUI = function(req, res, next){
 
 	var ep = EventProxy.create('movie', 'tv_neidi', 'tv_oumei', 'tv_gangtai', 'tv_rihan',
 						function (movie, tv_neidi, tv_oumei, tv_gangtai, tv_rihan){
-		res.render('portal/1.0.1/index', {
+		res.render('portal/1.0.1/new', {
 			conf: conf,
 			description: '',
 			keywords: ',html5,nodejs',
+			nav: 'new',
 			data: {
 				movie: movie,
 				tv_neidi: tv_neidi,

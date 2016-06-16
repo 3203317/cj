@@ -11,7 +11,7 @@
 		</div>
 		<div id='navbar-collapse' class='collapse navbar-collapse'>
 			<ul class='nav navbar-nav'>
-				<li class='dropdown'>
+				<li class='dropdown#if('movie' == $nav) active#end'>
 					<a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>电影 <b class='caret'></b></a>
 					<ul class='dropdown-menu'>
 						<li><a href='/movie/动作/'>动作</a></li>
@@ -25,7 +25,7 @@
 						<li><a href='/movie/灾难/'>灾难</a></li>
 					</ul>
 				</li>
-				<li class='dropdown'>
+				<li class='dropdown#if('tv' == $nav) active#end'>
 					<a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>电视剧 <b class='caret'></b></a>
 					<ul class='dropdown-menu'>
 						<li><a href='/tv/内地/'>内地</a></li>
@@ -37,7 +37,7 @@
 				#*<!--li><a href='javascript:;'>动漫</a></li>
 				<li><a href='javascript:;'>游戏</a></li>
 				<li><a href='javascript:;'>综艺</a></li-->*#
-				<li class='active'><a href='/new/'>最近更新</a></li>
+				<li#if('new' == $nav) class='active'#end><a href='/new/'>最近更新</a></li>
 			</ul>
 			<ul class='nav navbar-nav navbar-right'>
 				<li><a href='javascript:;'>关于</a></li>

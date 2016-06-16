@@ -37,8 +37,10 @@ function proc_manage(app){
 function proc_portal(app){
 	var index = portal.index;
 
-	app.get('/', index.indexUI);
 	app.get('/new/', index.newUI);
+	app.get('/movie/:name/', index.materialUI);
+
+	app.get('/', index.indexUI);
 }
 
 /**

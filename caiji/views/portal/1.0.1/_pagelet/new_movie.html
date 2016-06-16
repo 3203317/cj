@@ -9,8 +9,8 @@
 		<div id='movie' class='panel-collapse collapse in'>
 			<div class='panel-body'>
 				#foreach($doc in $!{data.movie.docs})<p>
-					<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>:
-					<a title='创建于 #formatDate($!{doc.CREATE_TIME})' href='/movie/$!{doc.id}.html'>$!{doc.TITLE}</a>
+					$!{doc.TYPE_NAME}:
+					<a title='更新于 #formatDate($!{doc.CREATE_TIME})' href='/archive/$!{doc.id}.html'>$!{doc.TITLE}</a>
 					<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
 				</p>#end
 			</div>
