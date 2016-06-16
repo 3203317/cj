@@ -13,6 +13,7 @@ var conf = require('../../settings');
 var EventProxy = require('eventproxy');
 
 var biz = {
+	movie_material: require('../../biz/movie_material'),
 	movie: require('../../biz/movie')
 };
 
@@ -32,7 +33,7 @@ exports.indexUI = function(req, res, next){
  */
 exports.materialUI = function(req, res, next){
 
-	var ep = EventProxy.create('zone', function (zone){
+	var ep = EventProxy.create('zone', 'movie_material', function (zone, movie_material){
 		res.render('portal/1.0.1/material', {
 			conf: conf,
 			description: '',
@@ -42,6 +43,7 @@ exports.materialUI = function(req, res, next){
 				name: req.params.name
 			},
 			data: {
+				movie_material: movie_material,
 				zone: zone
 			}
 		});
@@ -59,6 +61,11 @@ exports.materialUI = function(req, res, next){
 			'rihan': '日韩'
 		}]);
 	})();
+
+	biz.movie_material.findAll(function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('movie_material', docs);
+	});
 };
 
 /**
@@ -92,11 +99,11 @@ exports.newUI = function(req, res, next){
 	biz.movie.findNew('dianying', function (err, docs){
 		if(err) return ep.emit('error', err);
 
-		var movie = { docs: docs, types: [] };
+		var movie = { docs: docs, materials: [] };
 
 		for(var i in docs){
-			if(-1 === movie.types.indexOf((docs[i]).TYPE_NAME)){
-				movie.types.push((docs[i]).TYPE_NAME);
+			if(-1 === movie.materials.indexOf((docs[i]).MATERIAL_ID_TEXT)){
+				movie.materials.push((docs[i]).MATERIAL_ID_TEXT);
 			}
 		}
 

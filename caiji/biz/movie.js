@@ -18,58 +18,60 @@ var EventProxy = require('eventproxy');
 
 var conf = require('../settings');
 
+var movie_material = require('./movie_material');
+
 var exports = module.exports;
 
+/**
+ * 获取最近更新的电影
+ *
+ * @param
+ * @return
+ */
 (function (exports){
-	var sql = 'SELECT b.TYPE_NAME, a.*'+
-				' FROM (SELECT * FROM d_movie WHERE TYPE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10) a LEFT JOIN d_movie_material b ON (a.MATERIAL_ID=b.id)'+
-				' WHERE b.id IS NOT NULL';
-	/**
-	 * 获取最近更新的电影
-	 *
-	 * @param
-	 * @return
-	 */
+	var sql = 'SELECT * FROM d_movie WHERE TYPE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10';
+
 	exports.findNew = function(type_id, cb){
 		mysql.query(sql, [type_id], function (err, docs){
 			if(err) return cb(err);
-			cb(null, docs);
+
+			movie_material.procData(function (err, obj){
+				if(err) return cb(err);
+
+				for(var i in docs){
+					var doc = docs[i];
+					doc.MATERIAL_ID_TEXT = obj[doc.MATERIAL_ID.split(',')[0]].TYPE_NAME;
+				}
+
+				cb(null, docs);
+			});
 		});
 	};
 })(exports);
 
+/**
+ * 电视剧
+ *
+ * @param
+ * @return
+ */
 (function (exports){
-	var sql = 'SELECT b.TYPE_NAME, a.*'+
-				' FROM (SELECT * FROM d_movie WHERE TYPE_ID="dianshiju" AND ZONE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10) a LEFT JOIN d_movie_material b ON (a.MATERIAL_ID=b.id)'+
-				' WHERE b.id IS NOT NULL';
-	/**
-	 * 电视剧
-	 *
-	 * @param
-	 * @return
-	 */
+	var sql = 'SELECT * FROM d_movie WHERE TYPE_ID="dianshiju" AND ZONE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10';
+
 	exports.findNewTv = function(zone_id, cb){
 		mysql.query(sql, [zone_id], function (err, docs){
 			if(err) return cb(err);
-			cb(null, docs);
-		});
-	};
-})(exports);
 
-(function (exports){
-	// 获取调度次数 > 0 的最早的 1 条记录
-	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>0 AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
-	/**
-	 * startup 0停止 1采集ing 2分析ing
-	 *
-	 * @param startup 启动状态
-	 * @return
-	 */
-	exports.getByStartup = function(startup, cb){
-		// 执行 sql 查询
-		mysql.query(sql, [startup || 0], function (err, docs){
-			if(err) return cb(err);
-			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
+			movie_material.procData(function (err, obj){
+				if(err) return cb(err);
+
+				for(var i in docs){
+					var doc = docs[i];
+					doc.MATERIAL_ID_TEXT = obj[doc.MATERIAL_ID.split(',')[0]].TYPE_NAME;
+				}
+
+				cb(null, docs);
+			});
 		});
 	};
 })(exports);
@@ -80,7 +82,6 @@ var exports = module.exports;
  * @return
  */
 exports.getById = function(id, cb){
-	// TODO
 	mysql_util.find(null, 'c_task', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
