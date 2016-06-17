@@ -64,7 +64,7 @@
 		<h3 class='panel-title glyphicon glyphicon-tag'>&#8201;电影索引</h3>
 	</div>
 	<div class='panel-body'>
-		#foreach($doc in $!{data.movie_material})<a href='/movie/$!{doc.TYPE_NAME}/'>$!{doc.TYPE_NAME}</a>
+		#foreach($doc in $!{data.movie_material})<a href='/movie/$!{doc.id}/'>$!{doc.TYPE_NAME}</a>
 		#end
 	</div>
 </div>

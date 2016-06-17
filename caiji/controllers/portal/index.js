@@ -33,38 +33,44 @@ exports.indexUI = function(req, res, next){
  */
 exports.materialUI = function(req, res, next){
 
-	var ep = EventProxy.create('zone', 'movie_material', function (zone, movie_material){
-		res.render('portal/1.0.1/material', {
-			conf: conf,
-			description: '',
-			keywords: ',html5,nodejs',
-			nav: 'movie',
-			params: {
-				name: req.params.name
-			},
-			data: {
-				movie_material: movie_material,
-				zone: zone
-			}
+	biz.movie_material.getById(req.params.name, function (err, doc){
+		if(err) return next(err);
+
+		if(!doc) return res.redirect('/');
+
+		var ep = EventProxy.create('zone', 'movie_material', function (zone, movie_material){
+			res.render('portal/1.0.1/material', {
+				conf: conf,
+				description: '',
+				keywords: ',html5,nodejs',
+				nav: 'movie',
+				params: {
+					name: doc.TYPE_NAME
+				},
+				data: {
+					movie_material: movie_material,
+					zone: zone
+				}
+			});
 		});
-	});
 
-	ep.fail(function (err, msg){
-		cb(err);
-	});
+		ep.fail(function (err, msg){
+			cb(err);
+		});
 
-	(function(){
-		ep.emit('zone', [{
-			'neidi': '内地',
-			'gangtai': '港台',
-			'oumei': '欧美',
-			'rihan': '日韩'
-		}]);
-	})();
+		(function(){
+			ep.emit('zone', [{
+				'neidi': '内地',
+				'gangtai': '港台',
+				'oumei': '欧美',
+				'rihan': '日韩'
+			}]);
+		})();
 
-	biz.movie_material.findAll(function (err, docs){
-		if(err) return ep.emit('error', err);
-		ep.emit('movie_material', docs);
+		biz.movie_material.findAll(function (err, docs){
+			if(err) return ep.emit('error', err);
+			ep.emit('movie_material', docs);
+		});
 	});
 };
 

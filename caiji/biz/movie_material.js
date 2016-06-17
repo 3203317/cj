@@ -26,6 +26,22 @@ var exports = module.exports;
  * @return
  */
 (function (exports){
+	var sql = 'SELECT * FROM d_movie_material WHERE id=?';
+
+	exports.getById = function(id, cb){
+		mysql.query(sql, [id], function (err, docs){
+			if(err) return cb(err);
+			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
+		});
+	};
+})(exports);
+
+/**
+ *
+ * @param
+ * @return
+ */
+(function (exports){
 	var sql = 'SELECT * FROM d_movie_material ORDER BY SORT';
 
 	exports.findAll = function(cb){
