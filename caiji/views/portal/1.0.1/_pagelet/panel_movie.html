@@ -1,9 +1,18 @@
+<script>
+function img404(event){
+  // 获取img对象，火狐是event.target ，IE及谷歌其他是event.srcElement
+  var img = event.srcElement || event.target;
+  img.src = 'http://a.hiphotos.baidu.com/image/h%3D200/sign=64175659840a19d8d403830503fb82c9/e7cd7b899e510fb3a78c787fdd33c895d0430c44.jpg';
+  img.onerror = null;
+}
+</script>
+
 <div class='row movie1'>
 	<div class="col-sm-6 col-md-4">
     <div class="thumbnail">
       <a href='#翻译官' class='abc'>
         <div class='zxgk'>在线观看</div>
-        <img class='cover_img' src="http://i-7.vcimg.com/crop/fcd6a9c0a227ca8e36bad6f4d925358c82145(600x)/thumb.jpg" alt="Generic placeholder thumbnail"></a>
+        <img class='cover_img' id='abc' onerror='img404(event);' src="http://i-7.vcimg.com/crop/fcd6a9c0a227ca8e36bad6f4d925358c82145(600x)/thumb.jpg" alt="Generic placeholder thumbnail"></a>
       <div class="caption">
         <h3><a href='#'>《翻译官》</a></h3>
         <h6>更新至42集</h6>
@@ -117,13 +126,14 @@
 }
 
 .movie1 .thumbnail img {
-  z-index: 1;
+  z-index: 13;
   position: relative;
 }
 
-.movie1 .abc:hover, .cover_img {
+.movie1 .thumbnail img:hover {
   background-color: #000;
   opacity: 0.7;
+  z-index: 14;
 }
 
 .cover_img {
@@ -138,15 +148,21 @@
   background: rgba(0, 0, 0, 0.6) none repeat scroll 0 0;
   color: #fff;
   text-align: center;
-  width: 100%;
+  
   position: absolute;
   height: 25px;
   line-height: 25px;
   font-size: 12px;
   
-  z-index: 2;
+  z-index: 31;
   
 }
+
+.thumbnail:hover #abc {
+  width: 100px;
+  height: 200px;
+}
+
 </style>
 
 <script>
@@ -160,3 +176,4 @@
   jq(window).resize(resize);
 })($);
 </script>
+
