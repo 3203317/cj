@@ -31,6 +31,51 @@ exports.indexUI = function(req, res, next){
  * @params
  * @return
  */
+exports.articleUI = function(req, res, next){
+
+	biz.movie.getById(req.params.id, function (err, doc){
+		if(err) return next(err);
+
+		if(!doc) return res.redirect('/');
+
+		var ep = EventProxy.create('zone', 'movie_material', function (zone, movie_material){
+			res.render('portal/1.0.1/article', {
+				conf: conf,
+				description: '',
+				keywords: ',html5,nodejs',
+				nav: 'movie',
+				data: {
+					movie_material: movie_material,
+					zone: zone
+				}
+			});
+		});
+
+		ep.fail(function (err, msg){
+			cb(err);
+		});
+
+		(function(){
+			ep.emit('zone', [{
+				'neidi': '内地',
+				'gangtai': '港台',
+				'oumei': '欧美',
+				'rihan': '日韩'
+			}]);
+		})();
+
+		biz.movie_material.findAll(function (err, docs){
+			if(err) return ep.emit('error', err);
+			ep.emit('movie_material', docs);
+		});
+	});
+};
+
+/**
+ *
+ * @params
+ * @return
+ */
 exports.materialUI = function(req, res, next){
 
 	biz.movie_material.getById(req.params.name, function (err, doc){

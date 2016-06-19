@@ -10,11 +10,11 @@ function img404(event){
 <div class='row movie1'>
 	<div class="col-sm-6 col-md-4">
     <div class="thumbnail">
-      <a href='#翻译官' class='abc'>
+      <a href='/archive/1.html' class='abc'>
         <div class='zxgk'>在线观看</div>
         <img class='cover_img' id='abc' onerror='img404(event);' src="http://i-7.vcimg.com/crop/fcd6a9c0a227ca8e36bad6f4d925358c82145(600x)/thumb.jpg" alt="Generic placeholder thumbnail"></a>
       <div class="caption">
-        <h3><a href='#'>《翻译官》</a></h3>
+        <h3><a href='/archive/1.html'>《翻译官》</a></h3>
         <h6>更新至42集</h6>
         <p>杨幂黄轩演绎完美寻爱教科书，黄轩男友力Max！</p>
         
@@ -159,8 +159,23 @@ function img404(event){
 }
 
 .thumbnail:hover #abc {
-  width: 100px;
-  height: 200px;
+  /*width: 100px;
+  height: 200px;*/
+}
+
+
+.thumbnail:hover .play_ico_big {
+  width: 61px;
+  height: 61px;
+}
+
+.play_ico_big {
+  background: rgba(0, 0, 0, 1) url("/public/assets/images/play_ico.png?v=835fd18f") no-repeat scroll 0 0;
+  position: absolute;
+  left: 40%;
+  top: 25%;
+  
+  margin: 0;
 }
 
 </style>
