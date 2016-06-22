@@ -41,8 +41,10 @@ function proc_portal(app){
 	app.get('/archive/:id.html$', index.articleUI);
 
 	app.get('/new/', index.newUI);
-	app.get('/movie/:movie_material_id/:action/', index.vali_action, index.materialUI);
-	app.get('/movie/:movie_material_id/', index.materialUI);
+	app.get('/movie/:movie_material_id/:action/page:page$', index.vali_page, index.vali_action, index.vali_material, index.materialUI);
+	app.get('/movie/:movie_material_id/:action/', index.vali_action, index.vali_material, index.materialUI);
+	app.get('/movie/:movie_material_id/page:page$', index.vali_page, index.vali_material, index.materialUI);
+	app.get('/movie/:movie_material_id/', index.vali_material, index.materialUI);
 
 	app.get('/', index.indexUI);
 }

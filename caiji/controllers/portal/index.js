@@ -72,8 +72,20 @@ exports.articleUI = function(req, res, next){
 	});
 };
 
+/**
+ * 检测分页
+ *
+ * @params
+ * @return
+ */
+exports.vali_page = function(req, res, next){
+	var page = util.checkNum(req.params.page);
+	if(!page) return res.redirect('/');
+	next();
+};
+
 (function (exports){
-	var s = ['hot', 'rating', 'create', 'release', undefined];
+	var s = ['hot', 'rating', 'create', 'release'];
 
 	exports.vali_action = function(req, res, next){
 		if(-1 === s.indexOf(req.params.action)) return res.redirect('/');
@@ -82,61 +94,94 @@ exports.articleUI = function(req, res, next){
 })(exports);
 
 /**
+ * 检测影片类型
+ *
+ * @params
+ * @return
+ */
+exports.vali_material = function(req, res, next){
+	biz.movie_material.findByZone({ id: req.params.movie_material_id }, function (err, docs){
+		if(err) return next(err);
+		// 判断是否存在一条记录
+		if(!docs || 0 === docs.length) return res.redirect('/');
+		req.flash('movie_material', docs[0]);
+		next();
+	});
+};
+
+/**
  *
  * @params
  * @return
  */
 exports.materialUI = function(req, res, next){
 
-	biz.movie_material.findByZone({ id: req.params.movie_material_id }, function (err, docs){
-		if(err) return next(err);
+	// 从flash中获取
+	var material = req.flash('movie_material')[0];
 
-		// 判断是否存在一条记录
-		if(!docs || 0 === docs.length) return res.redirect('/');
-		var material = docs[0];
-
-		var ep = EventProxy.create('movie_material', 'view_count',
-							function (movie_material, view_count){
-			res.render('portal/1.0.1/material', {
-				conf: conf,
-				description: '',
-				keywords: ',html5,nodejs',
-				nav: 'movie',
-				params: {
-					movie_action: req.params.action || '',
-					movie_material_id: material.id,
-					movie_material_name: material.TYPE_NAME
-				},
-				data: {
-					view_count: view_count,
-					movie_material: movie_material
-				}
-			});
+	var ep = EventProxy.create('movie_material', 'view_count', 'movies',
+						function (movie_material, view_count, movies){
+		res.render('portal/1.0.1/material', {
+			conf: conf,
+			description: '',
+			keywords: ',html5,nodejs',
+			nav: 'movie',
+			params: {
+				movie_action: req.params.action || '',
+				movie_material_id: material.id,
+				movie_material_name: material.TYPE_NAME
+			},
+			data: {
+				movies: movies,
+				view_count: view_count,
+				movie_material: movie_material
+			}
 		});
-
-		ep.fail(function (err, msg){
-			cb(err);
-		});
-
-		biz.movie_material.findByZone(null, function (err, docs){
-			if(err) return ep.emit('error', err);
-			ep.emit('movie_material', docs);
-		});
-
-		// 人气排行 访问量
-		biz.movie.findByMovie({ MATERIAL_ID: material.id }, [1, 10], ['VIEW_COUNT DESC'], function (err, docs){
-			if(err) return ep.emit('error', err);
-			ep.emit('view_count', docs);
-		});
-
-		// 根据动作查询
-		switch(req.params.action){
-			case 'hot':
-				break;
-			default:
-				break;
-		}
 	});
+
+	ep.fail(function (err, msg){
+		cb(err);
+	});
+
+	biz.movie_material.findByZone(null, function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('movie_material', docs);
+	});
+
+	// 人气排行 访问量
+	biz.movie.findByMovie({ MATERIAL_ID: material.id }, [1, 10], ['VIEW_COUNT DESC'], function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('view_count', docs);
+	});
+
+	// 根据动作查询
+	switch(req.params.action){
+		case 'hot':
+		case 'rating':
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['VIEW_COUNT DESC'], function (err, docs){
+				if(err) return ep.emit('error', err);
+				ep.emit('movies', docs);
+			});
+			break;
+		case 'create':
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['CREATE_TIME DESC'], function (err, docs){
+				if(err) return ep.emit('error', err);
+				ep.emit('movies', docs);
+			});
+			break;
+		case 'release':
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['AGE DESC'], function (err, docs){
+				if(err) return ep.emit('error', err);
+				ep.emit('movies', docs);
+			});
+			break;
+		default:
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['UPDATE_TIME DESC'], function (err, docs){
+				if(err) return ep.emit('error', err);
+				ep.emit('movies', docs);
+			});
+			break;
+	}
 };
 
 /**
