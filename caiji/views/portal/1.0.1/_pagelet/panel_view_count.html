@@ -1,0 +1,23 @@
+<div class='panel panel-default olx-panel'>
+	<div class='panel-heading'>
+		<h3 class='panel-title glyphicon glyphicon-fire'>&#8201;人气排行</h3>
+	</div>
+	<div class='panel-body'>
+		<ul class='list-group'>
+			#foreach($doc in $!{data.view_count})<li class='list-group-item'>
+				<span class='badge'>#numToMoney($!{doc.VIEW_COUNT})</span>
+				<a href='/archive/$!{doc.id}.html' title='创建于 #formatDate($!{doc.CREATE_TIME})'>
+					<div>$!{velocityCount}、$!{doc.TITLE}</div>
+				</a>
+			</li>#end
+		</ul>
+	</div>
+</div>
+#*<!--script>
+$(function(){
+	$('#panel_download').pin({
+		minWidth: 940,
+		top: 60
+	});
+});
+</script-->*#

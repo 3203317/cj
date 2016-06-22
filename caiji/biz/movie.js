@@ -29,7 +29,7 @@ var exports = module.exports;
  * @param page 分页
  * @return
  */
-exports.findByMovie = function(movie, page, cb){
+exports.findByMovie = function(movie, page, orderby, cb){
 	var params = [];
 	var sql = 'SELECT * FROM d_movie WHERE 1=1';
 
@@ -50,7 +50,13 @@ exports.findByMovie = function(movie, page, cb){
 		}
 	}
 
-	sql += ' ORDER BY UPDATE_TIME DESC';
+	// 排序
+	(function(){
+		if(orderby){
+			sql += ' ORDER BY ';
+			sql += orderby.join(',');
+		}
+	})();
 
 	// 分页
 	(function(){
@@ -70,6 +76,7 @@ exports.findByMovie = function(movie, page, cb){
 
 			for(var i in docs){
 				var doc = docs[i];
+				if(!doc.MATERIAL_ID) break;
 				doc.MATERIAL_ID_TEXT = obj[doc.MATERIAL_ID.split(',')[0]].TYPE_NAME;
 			}
 

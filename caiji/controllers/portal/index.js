@@ -128,19 +128,20 @@ exports.materialUI = function(req, res, next){
  */
 exports.newUI = function(req, res, next){
 
-	var ep = EventProxy.create('movie', 'tv_neidi', 'tv_oumei', 'tv_gangtai', 'tv_rihan',
-						function (movie, tv_neidi, tv_oumei, tv_gangtai, tv_rihan){
+	var ep = EventProxy.create('new_movie', 'new_tv_neidi', 'new_tv_oumei', 'new_tv_gangtai', 'new_tv_rihan', 'view_count',
+						function (new_movie, new_tv_neidi, new_tv_oumei, new_tv_gangtai, new_tv_rihan, view_count){
 		res.render('portal/1.0.1/new', {
 			conf: conf,
 			description: '',
 			keywords: ',html5,nodejs',
 			nav: 'new',
 			data: {
-				movie: movie,
-				tv_neidi: tv_neidi,
-				tv_oumei: tv_oumei,
-				tv_gangtai: tv_gangtai,
-				tv_rihan: tv_rihan
+				view_count: view_count,
+				new_movie: new_movie,
+				new_tv_neidi: new_tv_neidi,
+				new_tv_oumei: new_tv_oumei,
+				new_tv_gangtai: new_tv_gangtai,
+				new_tv_rihan: new_tv_rihan
 			}
 		});
 	});
@@ -149,7 +150,7 @@ exports.newUI = function(req, res, next){
 		cb(err);
 	});
 
-	biz.movie.findByMovie({ TYPE_ID: 'dianying' }, [1, 10], function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianying' }, [1, 10], ['UPDATE_TIME DESC'], function (err, docs){
 		if(err) return ep.emit('error', err);
 
 		var movie = { docs: docs, materials: [] };
@@ -159,26 +160,32 @@ exports.newUI = function(req, res, next){
 			movie.materials.push((docs[i]).MATERIAL_ID_TEXT);
 		}
 
-		ep.emit('movie', movie);
+		ep.emit('new_movie', movie);
 	});
 
-	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'neidi' }, [1, 10], function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'neidi' }, [1, 10], ['UPDATE_TIME DESC'], function (err, docs){
 		if(err) return ep.emit('error', err);
-		ep.emit('tv_neidi', docs);
+		ep.emit('new_tv_neidi', docs);
 	});
 
-	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'oumei' }, [1, 10], function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'oumei' }, [1, 10], ['UPDATE_TIME DESC'], function (err, docs){
 		if(err) return ep.emit('error', err);
-		ep.emit('tv_oumei', docs);
+		ep.emit('new_tv_oumei', docs);
 	});
 
-	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'gangtai' }, [1, 10], function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'gangtai' }, [1, 10], ['UPDATE_TIME DESC'], function (err, docs){
 		if(err) return ep.emit('error', err);
-		ep.emit('tv_gangtai', docs);
+		ep.emit('new_tv_gangtai', docs);
 	});
 
-	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'rihan' }, [1, 10], function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'rihan' }, [1, 10], ['UPDATE_TIME DESC'], function (err, docs){
 		if(err) return ep.emit('error', err);
-		ep.emit('tv_rihan', docs);
+		ep.emit('new_tv_rihan', docs);
+	});
+
+	// 人气排行 访问量
+	biz.movie.findByMovie(null, [1, 10], ['VIEW_COUNT DESC'], function (err, docs){
+		if(err) return ep.emit('error', err);
+		ep.emit('view_count', docs);
 	});
 };
