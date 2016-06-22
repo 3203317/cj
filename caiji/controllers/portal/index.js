@@ -72,6 +72,15 @@ exports.articleUI = function(req, res, next){
 	});
 };
 
+(function (exports){
+	var s = ['hot', 'rating', 'create', 'release', undefined];
+
+	exports.vali_action = function(req, res, next){
+		if(-1 === s.indexOf(req.params.action)) return res.redirect('/');
+		next();
+	};
+})(exports);
+
 /**
  *
  * @params
@@ -119,6 +128,14 @@ exports.materialUI = function(req, res, next){
 			if(err) return ep.emit('error', err);
 			ep.emit('view_count', docs);
 		});
+
+		// 根据动作查询
+		switch(req.params.action){
+			case 'hot':
+				break;
+			default:
+				break;
+		}
 	});
 };
 
