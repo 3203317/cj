@@ -94,6 +94,7 @@ exports.materialUI = function(req, res, next){
 				keywords: ',html5,nodejs',
 				nav: 'movie',
 				params: {
+					movie_action: req.params.action || '',
 					movie_material_id: material.id,
 					movie_material_name: material.TYPE_NAME
 				},

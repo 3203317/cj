@@ -27,11 +27,11 @@
 
 							<div class="col-sm-12 col-md-12">
 								<div class="btn-group btn-group-sm" aria-label="Small button group" role="group">
-									<button class="btn btn-default" type="button">热门</button>
-									<button class="btn btn-default" type="button">评分</button>
-									<button class="btn btn-danger" type="button">更新</button>
-									<button class="btn btn-default" type="button">创建</button>
-									<button class="btn btn-default" type="button">上映</button>
+									<a class="btn #if('hot' == $params.movie_action) btn-danger#else btn-default#end" href='/movie/${params.movie_material_id}/hot/'>热门</a>
+									<a class="btn #if('rating' == $params.movie_action) btn-danger#else btn-default#end" href="/movie/${params.movie_material_id}/rating/">评分</a>
+									<a class="btn #if('' == $params.movie_action) btn-danger#else btn-default#end" href="/movie/${params.movie_material_id}/">更新</a>
+									<a class="btn #if('create' == $params.movie_action) btn-danger#else btn-default#end" href="/movie/${params.movie_material_id}/create/">创建</a>
+									<a class="btn #if('release' == $params.movie_action) btn-danger#else btn-default#end" href="/movie/${params.movie_material_id}/release/">上映</a>
 								</div>
 							</div>
 						</div>
