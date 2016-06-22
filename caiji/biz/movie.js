@@ -48,6 +48,11 @@ exports.findByMovie = function(movie, page, orderby, cb){
 			params.push(movie.ZONE_ID);
 			sql += ' AND ZONE_ID=?';
 		}
+
+		if(movie.MATERIAL_ID){
+			params.push('%,'+ movie.MATERIAL_ID +',%');
+			sql += ' AND CONCAT(",", MATERIAL_ID, ",") like ?';
+		}
 	}
 
 	// 排序

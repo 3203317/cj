@@ -41,7 +41,7 @@ function proc_portal(app){
 	app.get('/archive/:id.html$', index.articleUI);
 
 	app.get('/new/', index.newUI);
-	app.get('/movie/:name/', index.materialUI);
+	app.get('/movie/:movie_material_id/', index.materialUI);
 
 	app.get('/', index.indexUI);
 }

@@ -1,0 +1,20 @@
+<div class='panel panel-default olx-panel' id='panel_movie_material'>
+	<div class='panel-heading'>
+		<h3 class='panel-title glyphicon glyphicon-tag'>&#8201;电影索引</h3>
+	</div>
+	<div class='panel-body'>
+		#foreach($doc in $!{data.movie_material})<a href='/movie/$!{doc.id}/'>$!{doc.TYPE_NAME}</a>
+		#end
+	</div>
+</div>
+<style>
+#panel_movie_material .panel-body {
+	padding: 15px;
+}
+#panel_movie_material .panel-body a {
+	color: #555555;
+}
+#panel_movie_material .panel-body a:hover, a:focus {
+	color: #D9534F;
+}
+</style>

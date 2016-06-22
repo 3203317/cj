@@ -79,23 +79,27 @@ exports.articleUI = function(req, res, next){
  */
 exports.materialUI = function(req, res, next){
 
-	biz.movie_material.getById(req.params.name, function (err, doc){
+	biz.movie_material.findByZone({ id: req.params.movie_material_id }, function (err, docs){
 		if(err) return next(err);
 
-		if(!doc) return res.redirect('/');
+		// 判断是否存在一条记录
+		if(!docs || 0 === docs.length) return res.redirect('/');
+		var material = docs[0];
 
-		var ep = EventProxy.create('zone', 'movie_material', function (zone, movie_material){
+		var ep = EventProxy.create('movie_material', 'view_count',
+							function (movie_material, view_count){
 			res.render('portal/1.0.1/material', {
 				conf: conf,
 				description: '',
 				keywords: ',html5,nodejs',
 				nav: 'movie',
 				params: {
-					name: doc.TYPE_NAME
+					movie_material_id: material.id,
+					movie_material_name: material.TYPE_NAME
 				},
 				data: {
-					movie_material: movie_material,
-					zone: zone
+					view_count: view_count,
+					movie_material: movie_material
 				}
 			});
 		});
@@ -104,18 +108,15 @@ exports.materialUI = function(req, res, next){
 			cb(err);
 		});
 
-		(function(){
-			ep.emit('zone', [{
-				'neidi': '内地',
-				'gangtai': '港台',
-				'oumei': '欧美',
-				'rihan': '日韩'
-			}]);
-		})();
-
-		biz.movie_material.findAll(function (err, docs){
+		biz.movie_material.findByZone(null, function (err, docs){
 			if(err) return ep.emit('error', err);
 			ep.emit('movie_material', docs);
+		});
+
+		// 人气排行 访问量
+		biz.movie.findByMovie({ MATERIAL_ID: material.id }, [1, 10], ['VIEW_COUNT DESC'], function (err, docs){
+			if(err) return ep.emit('error', err);
+			ep.emit('view_count', docs);
 		});
 	});
 };

@@ -3,7 +3,7 @@
 <html>
 <head>
 #parse('_pagelet/header.html')
-<title>${params.name} | 电影 | 大杂烩</title>
+<title>${params.movie_material_name}片 | 电影 | 大杂烩</title>
 </head>
 <body>
 	#parse('portal/1.0.1/_pagelet/top_banner.html')
@@ -19,8 +19,8 @@
 								<i class='fa fa-home fa-fw'></i>
 								<a href='/'>首页</a>
 							</li>
-							<li>电影</li>
-							<li class='active'><a href='/movie/${params.name}/'>${params.name}片</a></li>
+							<li><a href='/movie/'>电影</a></li>
+							<li class='active'><a href='/movie/${params.movie_material_id}/'>${params.movie_material_name}片</a></li>
 						</ol>
 
 						<div class='row'>
@@ -41,24 +41,25 @@
 						#parse('portal/1.0.1/_pagelet/panel_movie.html')
 
 						<nav>
-						  <ul class="pagination pagination-sm">
-						    <li>
-						      <a href="#" aria-label="Previous">
-						        <span aria-hidden="true">&laquo;</span>
-						      </a>
-						    </li>
-						    <li><a href="#">1</a></li>
-						    <li><a href="#">2</a></li>
-						    <li><a href="#">3</a></li>
-						    <li><a href="#">4</a></li>
-						    <li><a href="#">5</a></li>
-						    <li>
-						      <a href="#" aria-label="Next">
-						        <span aria-hidden="true">&raquo;</span>
-						      </a>
-						    </li>
-						  </ul>
+							<ul class="pagination pagination-sm">
+								<li>
+									<a href="javascript:;" aria-label="Previous">
+										<span aria-hidden="true">&laquo;</span>
+									</a>
+								</li>
+								<li><a href="javascript:;">1</a></li>
+								<li><a href="javascript:;">2</a></li>
+								<li><a href="javascript:;">3</a></li>
+								<li><a href="javascript:;">4</a></li>
+								<li><a href="javascript:;">5</a></li>
+								<li>
+									<a href="javascript:;" aria-label="Next">
+										<span aria-hidden="true">&raquo;</span>
+									</a>
+								</li>
+							</ul>
 						</nav>
+
 						<div>
 							<a href='javascript:;'>
 								<img src='/public/assets/images/share/16x16/twitter.png'></a>
@@ -73,7 +74,8 @@
 				</div>
 			</div>
 			<div class='col-sm-12 col-md-4'>
-				#parse('portal/1.0.1/_pagelet/panel_type.html')
+				#parse('portal/1.0.1/_pagelet/panel_movie_material_view_count.html')
+				#parse('portal/1.0.1/_pagelet/panel_movie_material.html')
 			</div>
 		</div>
 	</section>
