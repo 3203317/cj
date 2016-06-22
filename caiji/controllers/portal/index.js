@@ -13,6 +13,7 @@ var conf = require('../../settings');
 var EventProxy = require('eventproxy');
 
 var biz = {
+	movie_zone: require('../../biz/movie_zone'),
 	movie_material: require('../../biz/movie_material'),
 	movie: require('../../biz/movie')
 };
@@ -120,6 +121,7 @@ exports.materialUI = function(req, res, next){
 };
 
 /**
+ * 最近更新
  *
  * @params
  * @return
@@ -147,36 +149,35 @@ exports.newUI = function(req, res, next){
 		cb(err);
 	});
 
-	biz.movie.findNew('dianying', function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianying' }, [1, 10], function (err, docs){
 		if(err) return ep.emit('error', err);
 
 		var movie = { docs: docs, materials: [] };
 
 		for(var i in docs){
-			if(-1 === movie.materials.indexOf((docs[i]).MATERIAL_ID_TEXT)){
-				movie.materials.push((docs[i]).MATERIAL_ID_TEXT);
-			}
+			if(-1 !== movie.materials.indexOf((docs[i]).MATERIAL_ID_TEXT)) break;
+			movie.materials.push((docs[i]).MATERIAL_ID_TEXT);
 		}
 
 		ep.emit('movie', movie);
 	});
 
-	biz.movie.findNewTv('neidi', function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'neidi' }, [1, 10], function (err, docs){
 		if(err) return ep.emit('error', err);
 		ep.emit('tv_neidi', docs);
 	});
 
-	biz.movie.findNewTv('oumei', function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'oumei' }, [1, 10], function (err, docs){
 		if(err) return ep.emit('error', err);
 		ep.emit('tv_oumei', docs);
 	});
 
-	biz.movie.findNewTv('gangtai', function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'gangtai' }, [1, 10], function (err, docs){
 		if(err) return ep.emit('error', err);
 		ep.emit('tv_gangtai', docs);
 	});
 
-	biz.movie.findNewTv('rihan', function (err, docs){
+	biz.movie.findByMovie({ TYPE_ID: 'dianshi', ZONE_ID: 'rihan' }, [1, 10], function (err, docs){
 		if(err) return ep.emit('error', err);
 		ep.emit('tv_rihan', docs);
 	});

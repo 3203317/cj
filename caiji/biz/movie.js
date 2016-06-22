@@ -23,58 +23,60 @@ var movie_material = require('./movie_material');
 var exports = module.exports;
 
 /**
- * 获取最近更新的电影
+ * 查询
  *
- * @param
+ * @param movie 对象
+ * @param page 分页
  * @return
  */
-(function (exports){
-	var sql = 'SELECT * FROM d_movie WHERE TYPE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10';
+exports.findByMovie = function(movie, page, cb){
+	var params = [];
+	var sql = 'SELECT * FROM d_movie WHERE 1=1';
 
-	exports.findNew = function(type_id, cb){
-		mysql.query(sql, [type_id], function (err, docs){
+	if(movie){
+		if(movie.id){
+			params.push(movie.id);
+			sql += ' AND id=?';
+		}
+
+		if(movie.TYPE_ID){
+			params.push(movie.TYPE_ID);
+			sql += ' AND TYPE_ID=?';
+		}
+
+		if(movie.ZONE_ID){
+			params.push(movie.ZONE_ID);
+			sql += ' AND ZONE_ID=?';
+		}
+	}
+
+	sql += ' ORDER BY UPDATE_TIME DESC';
+
+	// 分页
+	(function(){
+		params.push((page[0] - 1) * page[1]);
+		// 每页显示 10 条
+		params.push(page[1]);
+
+		sql += ' LIMIT ?, ?';
+	})();
+
+	mysql.query(sql, params, function (err, docs){
+		if(err) return cb(err);
+
+		// 附加电影类型
+		movie_material.procData(function (err, obj){
 			if(err) return cb(err);
 
-			movie_material.procData(function (err, obj){
-				if(err) return cb(err);
+			for(var i in docs){
+				var doc = docs[i];
+				doc.MATERIAL_ID_TEXT = obj[doc.MATERIAL_ID.split(',')[0]].TYPE_NAME;
+			}
 
-				for(var i in docs){
-					var doc = docs[i];
-					doc.MATERIAL_ID_TEXT = obj[doc.MATERIAL_ID.split(',')[0]].TYPE_NAME;
-				}
-
-				cb(null, docs);
-			});
+			cb(null, docs);
 		});
-	};
-})(exports);
-
-/**
- * 电视剧
- *
- * @param
- * @return
- */
-(function (exports){
-	var sql = 'SELECT * FROM d_movie WHERE TYPE_ID="dianshiju" AND ZONE_ID=? ORDER BY UPDATE_TIME DESC LIMIT 10';
-
-	exports.findNewTv = function(zone_id, cb){
-		mysql.query(sql, [zone_id], function (err, docs){
-			if(err) return cb(err);
-
-			movie_material.procData(function (err, obj){
-				if(err) return cb(err);
-
-				for(var i in docs){
-					var doc = docs[i];
-					doc.MATERIAL_ID_TEXT = obj[doc.MATERIAL_ID.split(',')[0]].TYPE_NAME;
-				}
-
-				cb(null, docs);
-			});
-		});
-	};
-})(exports);
+	});
+};
 
 /**
  *
@@ -82,7 +84,7 @@ var exports = module.exports;
  * @return
  */
 exports.getById = function(id, cb){
-	mysql_util.find(null, 'c_task', [['id', '=', id]], null, null, function (err, docs){
+	mysql_util.find(null, 'd_movie', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 	});
@@ -105,7 +107,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'INSERT INTO c_task (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
+		var sql = 'INSERT INTO d_movie (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
 		// TODO
 		exports.saveNew = function(newInfo, cb){
 			frmVali(newInfo, function (err){
@@ -151,7 +153,7 @@ exports.getById = function(id, cb){
 	 * @return
 	 */
 	(function (exports){
-		var sql = 'UPDATE c_task set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
+		var sql = 'UPDATE d_movie set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
 		// TODO
 		exports.editInfo = function(newInfo, cb){
 			frmVali(newInfo, function (err){

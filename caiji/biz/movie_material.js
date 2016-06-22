@@ -25,41 +25,33 @@ var exports = module.exports;
  * @param
  * @return
  */
-(function (exports){
-	var sql = 'SELECT * FROM d_movie_material WHERE id=?';
+exports.findByZone = function(material, cb){
+	var params = [];
+	var sql = 'SELECT * FROM d_movie_material WHERE 1=1';
 
-	exports.getById = function(id, cb){
-		mysql.query(sql, [id], function (err, docs){
-			if(err) return cb(err);
-			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
-		});
-	};
-})(exports);
+	if(material){
+		if(material.id){
+			params.push(material.id);
+			sql += ' AND id=?';
+		}
+	}
 
-/**
- *
- * @param
- * @return
- */
-(function (exports){
-	var sql = 'SELECT * FROM d_movie_material ORDER BY SORT';
+	sql += ' ORDER BY SORT';
 
-	exports.findAll = function(cb){
-		mysql.query(sql, null, function (err, docs){
-			if(err) return cb(err);
-			cb(null, docs);
-		});
-	};
-})(exports);
+	mysql.query(sql, params, function (err, docs){
+		if(err) return cb(err);
+		cb(null, docs);
+	});
+};
 
 /**
  * 处理数据
  *
  * @param
- * @return
+ * @return { 'a': object, 'b': object }
  */
 exports.procData = function(cb){
-	this.findAll(function (err, docs){
+	this.findByZone(null, function (err, docs){
 		if(err) return cb(err);
 
 		var obj = {};
