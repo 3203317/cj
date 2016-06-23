@@ -1,0 +1,20 @@
+#macro(m_page $curPage $pageCount $itemCount $pageSize)
+<nav>
+	<ul class="pagination pagination-sm">
+		<li class='disabled'>
+			<a href="./page1" aria-label="Previous">
+				<span aria-hidden="true">&laquo;首页</span>
+			</a>
+		</li>
+		<li><a href="javascript:;">1</a></li>
+		<li><a href="javascript:;">$curPage</a></li>
+		<li><a href="javascript:;">$pageCount</a></li>
+		<li><a href="javascript:;">$itemCount</a></li>
+		<li><a href="javascript:;">$pageSize</a></li>
+		<li>
+			<a href="javascript:;" aria-label="Next">
+				<span aria-hidden="true">尾页&raquo;</span>
+			</a>
+		</li>
+	</ul>
+</nav>#end

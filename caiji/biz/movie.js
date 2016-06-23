@@ -91,6 +91,45 @@ exports.findByMovie = function(movie, page, orderby, cb){
 };
 
 /**
+ * 查询数量
+ *
+ * @param movie 对象
+ * @param page 分页
+ * @return
+ */
+exports.findByMovieCount = function(movie, cb){
+	var params = [];
+	var sql = 'SELECT COUNT(1) AS COUNT FROM d_movie WHERE 1=1';
+
+	if(movie){
+		if(movie.id){
+			params.push(movie.id);
+			sql += ' AND id=?';
+		}
+
+		if(movie.TYPE_ID){
+			params.push(movie.TYPE_ID);
+			sql += ' AND TYPE_ID=?';
+		}
+
+		if(movie.ZONE_ID){
+			params.push(movie.ZONE_ID);
+			sql += ' AND ZONE_ID=?';
+		}
+
+		if(movie.MATERIAL_ID){
+			params.push('%,'+ movie.MATERIAL_ID +',%');
+			sql += ' AND CONCAT(",", MATERIAL_ID, ",") like ?';
+		}
+	}
+
+	mysql.query(sql, params, function (err, docs){
+		if(err) return cb(err);
+		cb(null, docs[0].COUNT);
+	});
+};
+
+/**
  *
  * @params
  * @return

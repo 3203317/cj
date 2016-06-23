@@ -123,8 +123,8 @@ exports.materialUI = function(req, res, next){
 		if(err) return next(err);
 		if(0 === movies.length) return res.redirect('/');
 
-		var ep = EventProxy.create('movie_material', 'view_count',
-							function (movie_material, view_count){
+		var ep = EventProxy.create('movie_material', 'view_count', 'movies_count',
+							function (movie_material, view_count, movies_count){
 			res.render('portal/1.0.1/material', {
 				conf: conf,
 				description: '',
@@ -135,6 +135,8 @@ exports.materialUI = function(req, res, next){
 					movie_material_id: material.id,
 					movie_material_name: material.TYPE_NAME
 				},
+				// 当前第n页，共n页，数据总数
+				page: [req.params.page || 1, Math.ceil(movies_count / conf.html.pageSize), movies_count],
 				data: {
 					movies: movies,
 					view_count: view_count,
@@ -157,32 +159,38 @@ exports.materialUI = function(req, res, next){
 			if(err) return ep.emit('error', err);
 			ep.emit('view_count', docs);
 		});
+
+		// 总数
+		biz.movie.findByMovieCount({ MATERIAL_ID: material.id }, function (err, count){
+			if(err) return ep.emit('error', err);
+			ep.emit('movies_count', count);
+		});
 	}
 
 	// 根据动作查询
 	switch(req.params.action){
 		case 'hot':
-			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['VIEW_COUNT DESC'], function (err, docs){
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, conf.html.pageSize], ['VIEW_COUNT DESC'], function (err, docs){
 				run(err, docs);
 			});
 			break;
 		case 'rating':
-			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['RATING DESC'], function (err, docs){
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, conf.html.pageSize], ['RATING DESC'], function (err, docs){
 				run(err, docs);
 			});
 			break;
 		case 'create':
-			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['CREATE_TIME DESC'], function (err, docs){
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, conf.html.pageSize], ['CREATE_TIME DESC'], function (err, docs){
 				run(err, docs);
 			});
 			break;
 		case 'release':
-			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['AGE DESC'], function (err, docs){
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, conf.html.pageSize], ['AGE DESC'], function (err, docs){
 				run(err, docs);
 			});
 			break;
 		default:
-			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['UPDATE_TIME DESC'], function (err, docs){
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, conf.html.pageSize], ['UPDATE_TIME DESC'], function (err, docs){
 				run(err, docs);
 			});
 			break;
