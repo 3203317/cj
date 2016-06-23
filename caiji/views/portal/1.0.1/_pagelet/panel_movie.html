@@ -15,7 +15,7 @@ function img404(event){
         <div class="thumbnail">
           <a href='/archive/$!{doc.id}.html'>
             <div class='title'>$!{doc.MOVIE_COVER_TITLE}</div>
-            <img onerror='img404(event);' src="$!{doc.MOVIE_COVER}" alt="Generic placeholder thumbnail">
+            <img onerror='img404(event);' src="$!{doc.MOVIE_COVER}" alt="$!{doc.TITLE}">
           </a>
           <div class="caption">
             <h3><a href='/archive/$!{doc.id}.html'>《$!{doc.MOVIE_NAME}》</a></h3>
@@ -63,7 +63,7 @@ function img404(event){
 <script>
 (function(jq){
   var resize = function(){
-    jq('.movie .thumbnail .title').css('width', jq('.thumbnail').width());
+    jq('.movie .thumbnail .title').css('width', jq('.movie .thumbnail').width());
   }
   jq(window).load(resize);
   jq(window).resize(resize);

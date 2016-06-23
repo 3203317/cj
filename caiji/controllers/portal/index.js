@@ -65,7 +65,7 @@ exports.articleUI = function(req, res, next){
 			}]);
 		})();
 
-		biz.movie_material.findAll(function (err, docs){
+		biz.movie_material.findByZone(null, function (err, docs){
 			if(err) return ep.emit('error', err);
 			ep.emit('movie_material', docs);
 		});
