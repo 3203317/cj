@@ -119,66 +119,71 @@ exports.materialUI = function(req, res, next){
 	// 从flash中获取
 	var material = req.flash('movie_material')[0];
 
-	var ep = EventProxy.create('movie_material', 'view_count', 'movies',
-						function (movie_material, view_count, movies){
-		res.render('portal/1.0.1/material', {
-			conf: conf,
-			description: '',
-			keywords: ',html5,nodejs',
-			nav: 'movie',
-			params: {
-				movie_action: req.params.action || '',
-				movie_material_id: material.id,
-				movie_material_name: material.TYPE_NAME
-			},
-			data: {
-				movies: movies,
-				view_count: view_count,
-				movie_material: movie_material
-			}
+	function run(err, movies){
+		if(err) return next(err);
+		if(0 === movies.length) return res.redirect('/');
+
+		var ep = EventProxy.create('movie_material', 'view_count',
+							function (movie_material, view_count){
+			res.render('portal/1.0.1/material', {
+				conf: conf,
+				description: '',
+				keywords: ',html5,nodejs',
+				nav: 'movie',
+				params: {
+					movie_action: req.params.action || '',
+					movie_material_id: material.id,
+					movie_material_name: material.TYPE_NAME
+				},
+				data: {
+					movies: movies,
+					view_count: view_count,
+					movie_material: movie_material
+				}
+			});
 		});
-	});
 
-	ep.fail(function (err, msg){
-		cb(err);
-	});
+		ep.fail(function (err, msg){
+			cb(err);
+		});
 
-	biz.movie_material.findByZone(null, function (err, docs){
-		if(err) return ep.emit('error', err);
-		ep.emit('movie_material', docs);
-	});
+		biz.movie_material.findByZone(null, function (err, docs){
+			if(err) return ep.emit('error', err);
+			ep.emit('movie_material', docs);
+		});
 
-	// 人气排行 访问量
-	biz.movie.findByMovie({ MATERIAL_ID: material.id }, [1, 10], ['VIEW_COUNT DESC'], function (err, docs){
-		if(err) return ep.emit('error', err);
-		ep.emit('view_count', docs);
-	});
+		// 人气排行 访问量
+		biz.movie.findByMovie({ MATERIAL_ID: material.id }, [1, 10], ['VIEW_COUNT DESC'], function (err, docs){
+			if(err) return ep.emit('error', err);
+			ep.emit('view_count', docs);
+		});
+	}
 
 	// 根据动作查询
 	switch(req.params.action){
 		case 'hot':
-		case 'rating':
 			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['VIEW_COUNT DESC'], function (err, docs){
-				if(err) return ep.emit('error', err);
-				ep.emit('movies', docs);
+				run(err, docs);
+			});
+			break;
+		case 'rating':
+			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['RATING DESC'], function (err, docs){
+				run(err, docs);
 			});
 			break;
 		case 'create':
 			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['CREATE_TIME DESC'], function (err, docs){
-				if(err) return ep.emit('error', err);
-				ep.emit('movies', docs);
+				run(err, docs);
 			});
 			break;
 		case 'release':
 			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['AGE DESC'], function (err, docs){
-				if(err) return ep.emit('error', err);
-				ep.emit('movies', docs);
+				run(err, docs);
 			});
 			break;
 		default:
 			biz.movie.findByMovie({ MATERIAL_ID: material.id }, [req.params.page || 1, 10], ['UPDATE_TIME DESC'], function (err, docs){
-				if(err) return ep.emit('error', err);
-				ep.emit('movies', docs);
+				run(err, docs);
 			});
 			break;
 	}
