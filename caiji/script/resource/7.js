@@ -5,10 +5,10 @@
  */
 (function(){
 	// 深度判断
-	if(1 !== doc.DEPTH) return callback(null);
+	if(1 !== resource.DEPTH) return callback(null);
 
 	var data = [];
-	var $ = cheerio.load(doc.html, { decodeEntities: false });
+	var $ = cheerio.load(resource.html, { decodeEntities: false });
 
 	$('#indextopleft').find('li').each(function (i, elem){
 		var that = $(this);
@@ -16,9 +16,9 @@
 
 		// 组装数据
 		data.push({
-			PID: doc.id,
+			PID: resource.id,
 			TITLE: a.text(),
-			DEPTH: 1 + doc.DEPTH,
+			DEPTH: 1 + resource.DEPTH,
 			SORT: 1 + i,
 			URI: 'http://www.poxiao.com'+ a.attr('href')
 		});

@@ -26,12 +26,11 @@ var exports = module.exports;
 				' WHERE b.id IS NOT NULL AND a.RETRY_COUNT<b.RETRY_COUNT ORDER BY a.RETRY_COUNT ASC, a.CREATE_TIME ASC LIMIT 1';
 	/**
 	 *
-	 * @param finished 0
+	 * @param finished 0停止 1捕获 2分析
 	 * @param task_id 任务id
 	 * @return
 	 */
 	exports.getByFinished = function(finished, task_id, cb){
-		// 执行 sql
 		mysql.query(sql, [finished, task_id], function (err, docs){
 			if(err) return cb(err);
 			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
@@ -45,10 +44,8 @@ var exports = module.exports;
  * @return
  */
 exports.getById = function(id, cb){
-	// TODO
 	mysql_util.find(null, 'c_resource', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
-		// TODO
 		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 	});
 };
@@ -59,7 +56,6 @@ exports.getById = function(id, cb){
  * @return
  */
 exports.getByTaskId = function(task_id, cb){
-	// TODO
 	mysql_util.find(null, 'c_resource', [['task_id', '=', task_id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		cb(null, docs);
@@ -84,8 +80,10 @@ exports.getByTaskId = function(task_id, cb){
 	 */
 	(function (exports){
 		var sql = 'INSERT INTO c_resource (id, PID, URI, SORT, CHARSET, TITLE, RETRY_COUNT, CREATE_TIME, FINISHED, TASK_ID, DEPTH) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-		// TODO
+
 		function saveNew(conn, newInfo, cb){
+
+			// data
 			var postData = [
 				util.replaceAll(uuid.v1(), '-', ''),
 				newInfo.PID,
@@ -99,6 +97,8 @@ exports.getByTaskId = function(task_id, cb){
 				newInfo.TASK_ID,
 				newInfo.DEPTH
 			];
+
+			// sql
 			conn.query(sql, postData, function (err, status){
 				if(err) return cb(err);
 				cb(null, status);
@@ -170,11 +170,12 @@ exports.getByTaskId = function(task_id, cb){
 	 */
 	(function (exports){
 		var sql = 'UPDATE c_resource set URI=?, CHARSET=?, TITLE=?, RETRY_COUNT=?, FINISHED=? WHERE id=?';
-		// TODO
+
 		exports.editInfo = function(newInfo, cb){
 			frmVali(newInfo, function (err){
 				if(err) return cb(err);
-				// EDIT
+
+				// data
 				var postData = [
 					newInfo.URI,
 					newInfo.CHARSET,
@@ -183,6 +184,8 @@ exports.getByTaskId = function(task_id, cb){
 					newInfo.FINISHED,
 					newInfo.id
 				];
+
+				// sql
 				mysql.query(sql, postData, function (err, status){
 					if(err) return cb(err);
 					cb(null, status);
@@ -203,6 +206,22 @@ exports.getByTaskId = function(task_id, cb){
 	// 删除资源 by 任务id
 	exports.removeByTaskId = function(task_id, cb){
 		mysql.query(sql, [task_id], function (err, status){
+			if(err) return cb(err);
+			cb(null, status);
+		});
+	};
+})(exports);
+
+/**
+ *
+ * @params
+ * @return
+ */
+(function (exports){
+	var sql = 'UPDATE c_resource set RETRY_COUNT=1+RETRY_COUNT WHERE id=?';
+
+	exports.editRetryCount = function(id, cb){
+		mysql.query(sql, [id], function (err, status){
 			if(err) return cb(err);
 			cb(null, status);
 		});

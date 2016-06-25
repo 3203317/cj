@@ -5,13 +5,13 @@
  */
 (function(){
 	// TODO
-	if(1 !== doc.DEPTH) return callback(null);
+	if(1 !== resource.DEPTH) return callback(null);
 
 	var data = [];
 
 	// TODO
 	(function(){
-		doc.html.match(/<a\s.*href=(\"([^<>"\']*)\").*>下一页<\/A>/ig);
+		resource.html.match(/<a\s.*href=(\"([^<>"\']*)\").*>下一页<\/A>/ig);
 		var uri = RegExp.$2;
 
 		if(uri){
@@ -24,7 +24,7 @@
 
 	// TODO
 	(function(){
-		var $ = cheerio.load(doc.html, { decodeEntities: false });
+		var $ = cheerio.load(resource.html, { decodeEntities: false });
 
 		$('.content', '.yp-list-box').find('h3').each(function (i, elem){
 			var that = $(this);
