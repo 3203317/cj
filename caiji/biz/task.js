@@ -21,8 +21,7 @@ var conf = require('../settings');
 var exports = module.exports;
 
 (function (exports){
-	// 获取调度次数 > 0 的最早的 1 条记录
-	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>0 AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
+	var sql = 'SELECT * FROM c_task WHERE SCHEDULE_TIME>? AND STARTUP=? ORDER BY CREATE_TIME ASC LIMIT 1';
 	/**
 	 * startup 0停止 1采集ing 2分析ing
 	 *
@@ -30,8 +29,7 @@ var exports = module.exports;
 	 * @return
 	 */
 	exports.getByStartup = function(startup, cb){
-		// 执行 sql 查询
-		mysql.query(sql, [startup || 0], function (err, docs){
+		mysql.query(sql, [0, startup || 0], function (err, docs){
 			if(err) return cb(err);
 			cb(null, mysql.checkOnly(docs) ? docs[0] : null);
 		});
@@ -44,7 +42,6 @@ var exports = module.exports;
  * @return
  */
 exports.getById = function(id, cb){
-	// TODO
 	mysql_util.find(null, 'c_task', [['id', '=', id]], null, null, function (err, docs){
 		if(err) return cb(err);
 		cb(null, mysql.checkOnly(docs) ? docs[0] : null);
@@ -69,7 +66,7 @@ exports.getById = function(id, cb){
 	 */
 	(function (exports){
 		var sql = 'INSERT INTO c_task (id, TASK_NAME, CREATE_TIME, STARTUP) values (?, ?, ?, ?)';
-		// TODO
+
 		exports.saveNew = function(newInfo, cb){
 			frmVali(newInfo, function (err){
 				if(err) return cb(err);
@@ -88,21 +85,21 @@ exports.getById = function(id, cb){
 						if(err) return cb(err);
 						cb(null, status);
 					});
-				} // END
+				}
 
 				(function(){
 					var newFolder = path.join(conf.robot.storagePath, id);
-					// TODO
+
 					fs.exists(newFolder, function (exists){
 						if(exists) return run();
-						// TODO
+
 						fs.mkdir(newFolder, 777, function (err){
 							if(err) return cb(err);
-							// TODO
+
 							console.log('[%s] 创建目录 %s', util.format(), id);
 							run();
 						});
-					}); // END
+					});
 				})();
 			});
 		};
@@ -115,17 +112,20 @@ exports.getById = function(id, cb){
 	 */
 	(function (exports){
 		var sql = 'UPDATE c_task set TASK_NAME=?, SCHEDULE_TIME=?, STARTUP=? WHERE id=?';
-		// TODO
+
 		exports.editInfo = function(newInfo, cb){
 			frmVali(newInfo, function (err){
 				if(err) return cb(err);
-				// EDIT
+
+				// data
 				var postData = [
 					newInfo.TASK_NAME,
 					newInfo.SCHEDULE_TIME,
 					newInfo.STARTUP,
 					newInfo.id
 				];
+
+				// sql
 				mysql.query(sql, postData, function (err, status){
 					if(err) return cb(err);
 					cb(null, status);

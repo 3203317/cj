@@ -200,7 +200,7 @@ exports.getByTaskId = function(task_id, cb){
 (function (exports){
 	var sql = 'DELETE FROM c_resource WHERE TASK_ID=?';
 
-	// 删除资源 by 任务 id
+	// 删除资源 by 任务id
 	exports.removeByTaskId = function(task_id, cb){
 		mysql.query(sql, [task_id], function (err, status){
 			if(err) return cb(err);

@@ -9,8 +9,8 @@ var later = require('later');
 
 var conf = require('../settings');
 
-var Catcher = require('./catcher');
 var Tasker = require('./tasker');
+var Catcher = require('./catcher');
 var Analyzer = require('./analyzer');
 
 var STATE_START   = 1;
@@ -36,24 +36,22 @@ pro.name = '__robot__';
 
 pro.start = function(cb){
 	var self = this;
-	// 如果已经启动则返回
 	if(STATE_START === self.state) return;
-	// 设置状态为启动
 	self.state = STATE_START;
 
-	// 任务组件
+	// tasker
 	if(!self.tasker) self.tasker = new Tasker(self.opts);
 	self.time_1 = later.setInterval(function(){
 		self.tasker.start();
 	}, schedule_1);
 
-	// 捕获器组件
+	// catcher
 	if(!self.catcher) self.catcher = new Catcher(self.opts);
 	self.time_2 = later.setInterval(function(){
 		self.catcher.start();
 	}, schedule_2);
 
-	// 分析器组件
+	// analyzer
 	if(!self.analyzer) self.analyzer = new Analyzer(self.opts);
 	self.time_3 = later.setInterval(function(){
 		self.analyzer.start();
@@ -64,11 +62,11 @@ pro.start = function(cb){
 
 pro.stop = function(force){
 	var self = this;
-	// 如果已经停止则返回
+
 	if(STATE_STOPED === self.state) return;
 	self.state = STATE_STOPED;
 
-	// 停止后清理
+	// clear
 	if(self.time_1) self.time_1.clear();
 	if(self.time_2) self.time_2.clear();
 	if(self.time_3) self.time_3.clear();
