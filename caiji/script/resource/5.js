@@ -4,12 +4,11 @@
  * MIT Licensed
  */
 (function(){
-	// TODO
+
 	if(1 !== resource.DEPTH) return callback(null);
 
 	var data = [];
 
-	// TODO
 	(function(){
 		resource.html.match(/<a\s.*href=(\"([^<>"\']*)\").*>下一页<\/A>/ig);
 		var uri = RegExp.$2;
@@ -19,10 +18,9 @@
 				DEPTH: 1,
 				URI: 'http://www.poxiao.com'+ uri
 			});
-		} // ENDIF
+		}
 	})();
 
-	// TODO
 	(function(){
 		var $ = cheerio.load(resource.html, { decodeEntities: false });
 
@@ -30,15 +28,13 @@
 			var that = $(this);
 			var a = that.find('a');
 
-			// TODO
 			data.push({
 				TITLE: a.text(),
 				DEPTH: 2,
 				URI: 'http://www.poxiao.com'+ a.attr('href')
 			});
 		}); // FOR
-	})(); // END
+	})();
 
-	// TODO
 	callback(null, data);
 })();

@@ -6,18 +6,21 @@
 // var cheerio = require('cheerio');
 // var Spooky = require('spooky');
 
-// var doc = {
+// var resource = {
 // 	DEPTH: 2,
 // 	html: '<html><body></body></html>',
 // 	URI: 'http://www.poxiao.com/movie/41006.html'
 // };
 
-// function callback(err){
+// function callback(err, json){
 // 	if(err) return console.log(err);
-// 	console.log(doc);
+// 	console.log(json);
 // }
 
 (function(){
+	// 深度判断
+	if(2 !== resource.DEPTH) return callback(null);
+
 	function casperjs(uri, cb){
 		var spooky = new Spooky({
 			child: {
@@ -38,15 +41,16 @@
 				e.details = err;
 				throw e;
 			}
-			// TODO
+
+			// start
 			spooky.start(uri);
 
 			spooky.then(function(){
-				// TODO
+
+				// data
 				var json = {};
 
 				try{
-					// TODO
 					json.TITLE = this.getTitle();
 					json.INTRO = this.getHTML('p.inner_content');
 					json.OTHER = this.evaluate(function(){
@@ -54,7 +58,7 @@
 					});
 				}catch(e){ console.error(e); }
 
-				// TODO
+				// emit
 				this.emit('json', json);
 			});
 
@@ -79,29 +83,24 @@
 		});
 	}
 
-	function analysis(doc, cb){
-		// TODO
-		casperjs(doc.URI, function (err, json){
+	function analysis(resource, cb){
+
+		casperjs(resource.URI, function (err, json){
 			if(err) return cb(err);
 
-			// TODO
-			var $ = cheerio.load(doc.html, { decodeEntities: false });
+			var $ = cheerio.load(resource.html, { decodeEntities: false });
 			// 标题
 			json.TITLE = $('#film').find('.detail_pic1').find('>img').attr('alt');
 			// 图片
 			json.IMG = $('#film').find('.detail_pic1').find('>img').attr('src');
 			json.RELEASE_DATE = true;
 
-			// TODO
-			doc.json = json;
-
-			cb(null);
+			cb(null, json);
 		});
 	}
 
-	// TODO
-	analysis(doc, function (err){
+	analysis(resource, function (err, json){
 		if(err) return callback(err);
-		callback(null);
+		callback(null, json);
 	});
 })();
