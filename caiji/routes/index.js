@@ -20,6 +20,10 @@ var portal = {
 	index: require('../controllers/portal/index')
 };
 
+var robot = {
+	index: require('../controllers/robot/index')
+};
+
 function proc_api(app){
 	var index = api.index;
 
@@ -49,6 +53,12 @@ function proc_portal(app){
 	app.get('/', index.indexUI);
 }
 
+function proc_robot(app){
+	var index = robot.index;
+
+	app.get('/robot/:task_id.json$', index.index);
+}
+
 /**
  *
  * @param
@@ -58,4 +68,5 @@ module.exports = function(app){
 	proc_manage(app);
 	proc_api(app);
 	proc_portal(app);
+	proc_robot(app);
 };
