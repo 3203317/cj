@@ -22,10 +22,43 @@ var exports = module.exports;
  */
 (function (exports){
 
+	function readJson(task_id, files, cb){
+		var j = [];
+
+		var i = 0;
+
+		function getFile(){
+			var file = files[i++];
+			if(!file) return null;
+			return ('.json' === utils.getFileSuffix(file)) ? file : getFile();
+		}
+
+		function run(){
+			var file = getFile();
+
+			if(!file) return cb(null, j);
+
+			fs.readFile(path.join(conf.robot.storagePath, task_id, file), 'utf-8', function (err, json){
+				if(err) return cb(err);
+				j.push(JSON.parse(json));
+				run();
+			});
+		}
+
+		run();
+	}
+
 	exports.index = function(req, res, next){
 		var result = { success: false };
 
-		result.task_id = req.params.task_id;
-		res.send(result);
+		fs.readdir(path.join(conf.robot.storagePath, req.params.task_id), function (err, files){
+			if(err) return res.send(result);
+
+			readJson(req.params.task_id, files, function (err, json){
+				if(err) return next(err);
+				result.data = json;
+				res.send(result);
+			});
+		});
 	};
 })(exports);
