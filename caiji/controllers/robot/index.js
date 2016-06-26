@@ -57,6 +57,7 @@ var exports = module.exports;
 			readJson(req.params.task_id, files, function (err, json){
 				if(err) return next(err);
 				result.data = json;
+				result.success = !0;
 				res.send(result);
 			});
 		});
