@@ -3,19 +3,21 @@
  * Copyright(c) 2015 caiji <3203317@qq.com>
  * MIT Licensed
  */
-// var cheerio = require('cheerio');
-// var Spooky = require('spooky');
+var cheerio = require('cheerio');
+var Spooky = require('spooky');
 
-// var resource = {
-// 	DEPTH: 2,
-// 	html: '<html><body></body></html>',
-// 	URI: 'http://www.poxiao.com/movie/41006.html'
-// };
+var resource = {
+	// URI: 'http://cn163.net/archives/3408/',
+	URI: 'http://www.foreworld.net/',
+	// URI: 'http://www.xiaoluo.cc/v/index434.html',
+	DEPTH: 2,
+	html: '<html><body></body></html>'
+};
 
-// function callback(err, json){
-// 	if(err) return console.log(err);
-// 	console.log(json);
-// }
+function callback(err, json){
+	if(err) return console.log(err);
+	console.log(json);
+}
 
 (function(){
 	// 深度判断
@@ -52,19 +54,19 @@
 
 				try{
 					json.TITLE = this.getTitle();
-					json.INTRO = this.getHTML('p.inner_content');
-					json.OTHER = this.evaluate(function(){
-						return __utils__.findOne('#button').getAttribute('value');
-					});
-					json.IMG = this.evaluate(function(){
-						var img = __utils__.findOne('#film span.detail_pic1 img').getAttribute('src');
+					// json.INTRO = this.getHTML('p.inner_content');
+					// json.OTHER = this.evaluate(function(){
+					// 	return __utils__.findOne('#button').getAttribute('value');
+					// });
+					// json.IMG = this.evaluate(function(){
+					// 	var img = __utils__.findOne('#film span.detail_pic1 img').getAttribute('src');
 
-						__utils__.echo('--------');
-						__utils__.echo(film);
-						__utils__.echo('--------');
+					// 	__utils__.echo('--------');
+					// 	__utils__.echo(film);
+					// 	__utils__.echo('--------');
 
-						return img;
-					});
+					// 	return img;
+					// });
 				}catch(e){ console.error(e); }
 
 				// emit
@@ -74,9 +76,9 @@
 			spooky.run();
 		});
 
-		// spooky.on('console', function (line){
-		// 	console.log(line);
-		// });
+		spooky.on('console', function (line){
+			console.log(line);
+		});
 
 		spooky.on('error', function (err, stack){
 			var e = new Error();
@@ -90,6 +92,32 @@
 			cb(null, json);
 			this.exit();
 		});
+
+		spooky.on('timeout', function(){
+			__utils__.echo('timeout');
+		});
+
+		spooky.on('resource.requested', function (requestData, request){
+			if(0 < requestData.url.indexOf('foreworld.net')){
+				request.abort();
+			}
+
+			if(0 < requestData.url.indexOf('soso.com')){
+				request.abort();
+			}
+
+			if(0 < requestData.url.indexOf('xunlei.com')){
+				request.abort();
+			}
+
+			if(0 < requestData.url.indexOf('xiaoluo.cc')){
+				request.abort();
+			}
+
+			if(0 < requestData.url.indexOf('miwifi.com')){
+				request.abort();
+			}
+		});
 	}
 
 	function analysis(resource, cb){
@@ -102,7 +130,7 @@
 			// json.TITLE = $('#film').find('.detail_pic1').find('>img').attr('alt');
 			// 图片
 			// json.IMG = $('#film').find('.detail_pic1').find('>img').attr('src');
-			json.RELEASE_DATE = true;
+			// json.RELEASE_DATE = true;
 
 			cb(null, json);
 		});
