@@ -5,23 +5,13 @@
  */
 'use strict';
 
-var utils = require('speedt-utils');
-
 var http = require('http');
 var https = require('https');
 
 var BufferHelper = require('bufferhelper');
 var iconv = require('iconv-lite');
 
-var conf = require('../settings');
-
-/**
- * 返回HTML字符串
- *
- * @params
- * @return
- */
-module.exports = function(uri, charset, cb){
+var sendReq = function(uri, charset, cb){
 	charset = charset || 'utf-8';
 
 	(function(){
@@ -31,8 +21,8 @@ module.exports = function(uri, charset, cb){
 			var bh = new BufferHelper();
 			// var ct = res.headers['content-type'];
 
-			res.setTimeout(conf.robot.timeout.response, function(){
-				console.error('[%s] 响应超时 %s', utils.format(), uri);
+			res.setTimeout(1000 * 3, function(){
+				console.error('[%s] 响应超时 %s', (new Date().getTime()), uri);
 			});
 
 			res.on('data', function (chunk){
@@ -50,8 +40,8 @@ module.exports = function(uri, charset, cb){
 			});
 		});
 
-		req.setTimeout(conf.robot.timeout.request, function(){
-			console.error('[%s] 请求超时 %s', utils.format(), uri);
+		req.setTimeout(1000 * 3, function(){
+			console.error('[%s] 请求超时 %s', (new Date().getTime()), uri);
 		});
 
 		req.on('error', function (err){
@@ -63,6 +53,14 @@ module.exports = function(uri, charset, cb){
 };
 
 /**
+ * 返回HTML字符串
+ *
+ * @params
+ * @return
+ */
+module.exports = sendReq;
+
+/**
  * 获取http或https
  *
  * @params
@@ -71,3 +69,8 @@ module.exports = function(uri, charset, cb){
 function getReq(uri){
 	return (0 === uri.indexOf('https:')) ? https.request : http.request;
 }
+
+// sendReq('http://www.xiaoluo.cc/v/index434.html', 'gbk', function (err, html){
+// 	if(err) return console.error(err);
+// 	console.log(html);
+// });

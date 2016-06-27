@@ -7,9 +7,10 @@ var cheerio = require('cheerio');
 var Spooky = require('spooky');
 
 var resource = {
+	// URI: 'https://www.taobao.com',
 	// URI: 'http://cn163.net/archives/3408/',
-	URI: 'http://www.foreworld.net/',
-	// URI: 'http://www.xiaoluo.cc/v/index434.html',
+	// URI: 'http://www.foreworld.net/',
+	URI: 'http://www.xiaoluo.cc/v/index434.html',
 	DEPTH: 2,
 	html: '<html><body></body></html>'
 };
@@ -30,12 +31,16 @@ function callback(err, json){
 			}, casper: {
 				logLevel: 'debug',
 				verbose: true,
-				timeout: 1000 * 10,
+				timeout: 1000 * 60,
 				pageSettings: {
 					// outputEncoding: 'gb2312',
 					loadImages: false,
 					loadPlugins: false
 				}
+			// }, child: {
+			// 	command: 'casper',
+			// 	ssl-protocol: 'tlsv1',
+			// 	ignore-ssl-errors: true
 			}
 		}, function (err){
 			if(err){
@@ -97,25 +102,25 @@ function callback(err, json){
 			__utils__.echo('timeout');
 		});
 
+		var s = [
+			'baidustat1c.com',
+			'cnzz.com',
+			'duoshuo.com',
+			'e708.net',
+			'e701.net',
+			'foreworld.net',
+			'soso.com',
+			'xunlei.com',
+			'xiaoluo.cc',
+			'miwifi.com'
+		];
+
 		spooky.on('resource.requested', function (requestData, request){
-			if(0 < requestData.url.indexOf('foreworld.net')){
-				request.abort();
-			}
 
-			if(0 < requestData.url.indexOf('soso.com')){
-				request.abort();
-			}
-
-			if(0 < requestData.url.indexOf('xunlei.com')){
-				request.abort();
-			}
-
-			if(0 < requestData.url.indexOf('xiaoluo.cc')){
-				request.abort();
-			}
-
-			if(0 < requestData.url.indexOf('miwifi.com')){
-				request.abort();
+			for(var i in s){
+				if(0 < requestData.url.indexOf(s[i])){
+					request.abort();
+				}
 			}
 		});
 	}
