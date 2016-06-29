@@ -6,12 +6,16 @@
 var cheerio = require('cheerio');
 var Spooky = require('spooky');
 
+var sendReq = require('../../lib/sendReq');
+
 var resource = {
 	// URI: 'https://www.taobao.com',
 	// URI: 'http://cn163.net/archives/3408/',
 	// URI: 'http://www.foreworld.net/',
+	// URI: 'http://www.poxiao.com/movie/41317.html',
 	URI: 'http://www.xiaoluo.cc/v/index434.html',
 	DEPTH: 2,
+	CHARSET: 'gbk',
 	html: '<html><body></body></html>'
 };
 
@@ -127,22 +131,42 @@ function callback(err, json){
 
 	function analysis(resource, cb){
 
+		var j = {};
+
+		var $ = cheerio.load(resource.html, { decodeEntities: false });
+
+		// 标题
+		j.TITLE = $('#main .pic img').attr('alt');
+		// 图片
+		j.IMG = $('#main .view .pic img').attr('src');
+		// 动作片
+		j.MATERIAL_ID_NAME = $('#main .view .info ul li').eq(1).find('a').text();
+
+		// 演员
+		j.演员 = $('#main .view .info ul li').eq(2).find('a');
+
+		if(true) return cb(null, j);
+
 		casperjs(resource.URI, function (err, json){
 			if(err) return cb(err);
-
-			var $ = cheerio.load(resource.html, { decodeEntities: false });
-			// 标题
-			// json.TITLE = $('#film').find('.detail_pic1').find('>img').attr('alt');
-			// 图片
-			// json.IMG = $('#film').find('.detail_pic1').find('>img').attr('src');
-			// json.RELEASE_DATE = true;
-
-			cb(null, json);
+			cb(null, j);
 		});
 	}
 
-	analysis(resource, function (err, json){
+	// analysis(resource, function (err, json){
+	// 	if(err) return callback(err);
+	// 	callback(null, json);
+	// });
+
+	sendReq(resource.URI, resource.CHARSET, function (err, html){
 		if(err) return callback(err);
-		callback(null, json);
+
+		// html 写入文件
+		resource.html = html;
+
+		analysis(resource, function (err, json){
+			if(err) return callback(err);
+			callback(null, json);
+		});
 	});
 })();
